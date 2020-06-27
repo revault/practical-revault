@@ -7,6 +7,7 @@ JSON is used to straightforwardly describe messages here but the actual encoding
 isn't decided yet.
 
 
+
 ## Sync server
 
 The sync server allows wallets to exchange signatures without the need for them to be
@@ -91,7 +92,9 @@ transaction.
 
 ```json
 {
-    "result": ["sigA", null, "sigC"]
+    "result": {
+        "signatures": ["sigA", null, "sigC"]
+    }
 }
 ```
 
@@ -113,6 +116,52 @@ This should not happen, but hey.
     "method": "err_sig",
     "params": {
         "id": "tx uuid"
+    }
+}
+```
+
+
+
+## Cosigning server
+
+A cosigning server is ran by each non-fund-manager participant. It is happy to sign any
+transaction, but only once.
+
+### Rough flow
+
+```
+  WALLET                      COSIG_SERVER
+    ||   -A-- sign  -------->    ||   // A: I need you to sign this transaction
+    ||   <-- sign result ----    ||   // Server: *signs* .. Here you go.
+    ||
+    ||   -B-- sign  -------->    ||   // B: I need you to sign this same transaction
+    ||   <-- sign result ----    ||   // Server: I already signed a transaction spending this txid, here is the existing signature
+```
+
+### Messages
+
+#### `sign`
+
+Sent at any point in time by a "trader" who'll soon attempt to unvault and spend a vault
+utxo.
+
+```json
+{
+    "method": "sign",
+    "params": {
+        "tx": "psbt"
+    }
+}
+```
+
+The server shall return the existing signature if it already signed a transaction spending
+this txid (no matter the actual transaction), or sign it, store this sig for future use,
+then return it (once again, no matter the actual transaction).
+
+```json
+{
+    "result": {
+        "signature": "sig as hex"
     }
 }
 ```
