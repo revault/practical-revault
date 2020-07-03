@@ -1,12 +1,3 @@
-# Practical revault
-
-A protocol sketch for communication between the different entities in the Revault
-architecture.
-
-JSON is used to straightforwardly describe messages here but the actual encoding
-isn't decided yet.
-
-
 ## Watchtower
 
 At least one watchtower is ran by every participant. A watchtower needs to be able to
