@@ -1,8 +1,23 @@
+# Messages
+
+A description of how information is exchanged between the different entities, as well as the
+flow of operations.
+
+This messages are exchanged on top of an encrypted and authenticated communication
+channel.
+
+
+- [Watchtower](watchtower)
+- [Cosigning server](cosigning-server)
+- [Synchronisation server](sync-server)
+
+
+
 ## Watchtower
 
-At least one watchtower is ran by every participant. A watchtower needs to be able to
-sign any revocation transaction before its corresponding wallet signs the unvaulting
-transaction.
+At least one watchtower is ran by every participant, and at most one wallet is paired with
+each watchtower. A watchtower needs to be able to sign any revocation transaction before
+its corresponding wallet signs the unvaulting transaction.
 
 In addition, a watchtower will by default revault any unvaulting attempt. We need a way
 for an authorized spender to signal its willingness to spend a vault, and for the
@@ -37,14 +52,14 @@ For this matter we use the synchronisation server.
     ||   -- request_spend    ---->   ||  // I'd like to spend this vault.
     ||   -- get_spend_requests -->   ||  // Just checking you made my request public..
     ||   -- get_spend_opinions -->   ||  // What do watchtowers say about this spend ?
-    ||  <--- spend_opinions  ---->   ||
+    ||  <--- spend_opinions  -----   ||
                 (....)
     ||   -- get_spend_opinions -->   ||
-    ||  <--- spend_opinions  ---->   ||  // Eventually all watchtowers responded.
+    ||  <--- spend_opinions  -----   ||  // Eventually all watchtowers responded.
 ```
 
 
-### Messages
+### Messages format
 
 #### `sig`
 
@@ -67,7 +82,7 @@ The `tx uid` is `sha256(txid)`.
 
 #### `sig_ack`
 
-The watchtower must not send an ACK if it did not build and checked the transactions, or
+The watchtower must not send an ACK if it did not build and check the transactions, or
 if it is unable to bump the feerate with its current utxos.
 FIXME: What is a reasonable limit for a WT to not send the ACK because of insufficient
 funds ?
@@ -125,10 +140,8 @@ Sent by a watchtower to the synchronisation server to signal its acceptance or r
 a specific spend. The `reason` field must be set if accept is `false`, otherwise it's
 ignored by the sync server.
 
-FIXME: should we require a signature here ? Seems to be a belt-and-suspenders check since
-there is the enrypted-authenticated message transport protocol.
-
-FIXMENIT: this probably needs a better name :).
+We require a signature for this message, as its relayed by the synchronisation server to
+the wallet.
 
 ```json
 {
@@ -136,7 +149,8 @@ FIXMENIT: this probably needs a better name :).
     "params": {
         "vault_id": "vault_uid",
         "accept": true,
-        "reason": ""
+        "reason": "",
+        "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
     }
 }
 ```
@@ -193,22 +207,27 @@ responded) array of the response of each watchtower.
         "opinions": [
             {
                 "accepted": true,
-                "reason": ""
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
             },
             {
                 "accepted": true,
-                "reason": ""
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
             },
             {
                 "accepted": true,
-                "reason": ""
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
             }
         ]
     }
 }
 ```
 
-The `vault_uid` is `sha256(vault txid)`.
+The `vault_uid` is `sha256(vault txid)`.  
+The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
+to validate the signature.
 
 
 
@@ -255,7 +274,7 @@ All transactions are signed paying a fixed 253perkw feerate.
             ...(polling)              // Eventually they all retrieve the sigs.
 ```
 
-### Messages
+### Messages format
 
 #### `sig`
 
@@ -353,7 +372,7 @@ transaction, but only once.
     ||   <-- sign result ----    ||   // Server: I already signed a transaction spending this txid, here is the existing signature
 ```
 
-### Messages
+### Messages format
 
 #### `sign`
 
