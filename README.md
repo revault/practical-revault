@@ -19,5 +19,5 @@ isn't decided yet.
 ## Table of contents
 
 - [Revault description](revault.pdf)
-- [Messages](messages.pdf)
+- [Messages](messages.md)
 - Transaction format // TODO
