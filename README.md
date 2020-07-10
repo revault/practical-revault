@@ -20,4 +20,4 @@ isn't decided yet.
 
 - [Revault description](revault.pdf)
 - [Messages](messages.md)
-- Transaction format // TODO
+- [Transaction](transactions.md)
