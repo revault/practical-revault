@@ -37,7 +37,7 @@ With `<vault_script>` being:
     ```
 - Else,
     ```
-    <pubkey 1> CHECKSIGVERIFY <pubkey 2> CHECKSIGVERIFY ... <pubkey N> CHECKSIGVERIFY
+    <pubkey 1> CHECKSIGVERIFY <pubkey 2> CHECKSIGVERIFY ... <pubkey N> CHECKSIG
     ```
 
 
