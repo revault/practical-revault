@@ -6,9 +6,8 @@ architecture](revault.pdf).
 
 This repo is for us to bikeshed on the actual and practical architecture before
 moving forward with the implementation.  
-Anyone is welcome for bikeshedding with us, or to raise issues for either:
-- Asking questions about the "protocol".
-- Pointing out actual issues with the "protocol".
+Anyone is welcome for bikeshedding with us, to raise issues for either asking questions
+about, or pointing out actual issues with the "protocol".
 
 
 JSON is used to straightforwardly describe messages here but the actual encoding
