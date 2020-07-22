@@ -31,7 +31,7 @@ At least one output paying to the following (P2WSH) script:
 ```
 
 With `<vault_script>` being:
-- If `N <= 15`,
+- If `N <= 20`,
     ```
     N <pubkey 1> <pubkey 2> ... <pubkey N> N CHECKMULTISIG
     ```
@@ -64,7 +64,7 @@ FIXME(darosior): try miniscript again.
     - sequence: `0xffffffff`
     - scriptSig: `<empty>`
     - witness:
-        - If `N <= 15`,
+        - If `N <= 20`,
             ```
             0 <sig pubkey 1> <sig pubkey 2> ... <sig pubkey N> <vault_script>
             ```
@@ -90,12 +90,13 @@ FIXME(darosior): try miniscript again.
             <cosigner M+1> CHECKSIGVERIFY ... <cosigner N> CHECKSIG
         ENDIF
         ```
-        (Adapted to use `CHECKMULTISIG`s when the number of pubkeys is less than `15`)
+        (Adapted to use `CHECKMULTISIG`s when the number of pubkeys is lesser than or
+        equal to `20`)
 
 - outputs[1]:
     - value: `330`sats
     - scriptPubkey: `0x00 SHA256(<cpfp_script>)`, with `<cpfp_script>` being:
-        - If `M < 15`
+        - If `M < 20`
             ```
             M <pubkey 1> <pubkey 2> ... <pubkey M> M CHECKMULTISIG
             ```
@@ -162,7 +163,7 @@ deposit transaction).
 - outputs[0]:
     - value: `<unvault_tx outputs[0] value - tx_fee>`
     - scriptPubkey: `0x00 SHA256(<vault_script>)`, with `<vault_script>` being:
-        - If `N <= 15`,
+        - If `N <= 20`,
             ```
             N <pubkey 1> <pubkey 2> ... <pubkey N> N CHECKMULTISIG
             ```
@@ -195,7 +196,7 @@ This transaction spends the `vault_tx` to the EDV.
     - sequence: `0xfffffffe`
     - scriptSig: `<empty>`
     - witness:
-        - If `N <= 15`,
+        - If `N <= 20`,
             ```
             0 <sig pubkey 1> <sig pubkey 2> ... <sig pubkey N> <vault_script>
             ```
