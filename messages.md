@@ -137,7 +137,7 @@ The `vault_uid` is `sha256(vault txid)`.
 #### `spend_opinion`
 
 Sent by a watchtower to the synchronisation server to signal its acceptance or refusal of
-a specific spend. The `reason` field must be set if accept is `false`, otherwise it's
+a specific spend. The `reason` field must be set if status is `rejected`, otherwise it's
 ignored by the sync server.
 
 We require a signature for this message, as its relayed by the synchronisation server to
@@ -148,7 +148,7 @@ the wallet.
     "method": "spend_opinion",
     "params": {
         "vault_id": "vault_uid",
-        "accept": true,
+        "status": "accepted",
         "reason": "",
         "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
     }
@@ -206,23 +206,39 @@ responded) array of the response of each watchtower.
         "vault_id": "vault_uid",
         "opinions": [
             {
-                "accepted": true,
+                "status": "accepted",
                 "reason": "",
                 "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
             },
             {
-                "accepted": true,
+                "status": "accepted",
                 "reason": "",
                 "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
             },
             {
-                "accepted": true,
+                "status": "accepted",
                 "reason": "",
                 "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
             }
         ]
     }
 }
+```
+
+| Opinion status | Description                         |
+| -------------- | ----------------------------------- |
+| `accepted`     | The TX passed the watchtower policy |
+| `rejected`     | The TX failed the watchtower policy |
+| `unanswered`   | The watchtower did not respond yet  |
+
+`unanswered` can occurs in the case the watchtower revealed itself to
+the sync_server and did not give its opinion on the spend requests. 
+
+```
+ WATCHTOWER                      SYNC_SERVER
+    ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
+    ||  <--- spend_requests  -----   ||  // Yep.
+    ||   ...                         ||
 ```
 
 The `vault_uid` is `sha256(vault txid)`.  
