@@ -7,9 +7,9 @@ This messages are exchanged on top of an encrypted and authenticated communicati
 channel.
 
 
-- [Watchtower](watchtower)
-- [Cosigning server](cosigning-server)
-- [Synchronisation server](sync-server)
+- [Watchtower](#watchtower)
+- [Cosigning server](#cosigning-server)
+- [Synchronisation server](#sync-server)
 
 
 
