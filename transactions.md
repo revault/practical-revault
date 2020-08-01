@@ -2,7 +2,7 @@
 
 All transactions are version 2 and use version 0 native Segwit scripts.
 
-We denote `N` the number of participants, `M` the number of authorized spenders (the subset
+We denote `N` the number of participants, `M` the number of managers (the subset
 of the participants allowed to unlock the unvault transaction output along with the
 cosigning servers), and `X` the CSV value in the unvault transaction.
 
@@ -44,10 +44,10 @@ With `<vault_script>` being:
 ## unvault_tx
 
 The transaction which spends the [`vault_tx`](vault_tx) deposit output, and creates an
-unvault output only spendable by the authorized spenders (along with the cosigning servers)
+unvault output only spendable by the managers (along with the cosigning servers)
 after `X` blocks.
 
-Note that the `M` pubkeys of the authorized spenders are used first in the output script
+Note that the `M` pubkeys of the managers are used first in the output script
 for opimisation purpose (they are needed in both spending path anyway).
 
 FIXME(darosior): try miniscript again.
@@ -85,7 +85,7 @@ FIXME(darosior): try miniscript again.
             # The everyone's-signing path, used for pre-signed transactions
             <pubkey M+1> CHECKSIGVERIFY ... <pubkey N> CHECKSIG
         ELSE
-            # The authorized spenders + cosigning servers path, used by the spend transaction
+            # The managers + cosigning servers path, used by the spend transaction
             X CHECKSEQUENCEVERIFY DROP
             <cosigner M+1> CHECKSIGVERIFY ... <cosigner N> CHECKSIG
         ENDIF

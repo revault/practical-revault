@@ -20,7 +20,7 @@ each watchtower. A watchtower needs to be able to sign any revocation transactio
 its corresponding wallet signs the unvaulting transaction.
 
 In addition, a watchtower will by default revault any unvaulting attempt. We need a way
-for an authorized spender to signal its willingness to spend a vault, and for the
+for a manager to signal its willingness to spend a vault, and for the
 watchtower to ACK or NACK it (cheaper and less onchain footprint than try-and-be-canceled).  
 For this matter we use the synchronisation server.
 
@@ -160,7 +160,7 @@ The `vault_uid` is `sha256(vault txid)`.
 
 #### `request_spend`
 
-Sent by an authorized spender to signal their willingness to spend a vault.
+Sent by a manager to signal their willingness to spend a vault.
 
 We use a timestamp as watchtowers might accept the same spending attempt in the future.
 
@@ -180,7 +180,7 @@ The `vault_uid` is `sha256(vault txid)`.
 
 #### `get_spend_opinions`
 
-Sent by an authorized spender when polling for watchtowers agreement regarding the spend
+Sent by a manager when polling for watchtowers agreement regarding the spend
 attempt identified by `vault_id`.
 
 ```json
