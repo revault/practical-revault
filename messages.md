@@ -140,6 +140,9 @@ Sent by a watchtower to the synchronisation server to signal its acceptance or r
 a specific spend. The `reason` field must be set if accept is `false`, otherwise it's
 ignored by the sync server.
 
+Note that there might be multiple spend attempts in flight: we support spend transaction
+batching.
+
 We require a signature for this message, as its relayed by the synchronisation server to
 the wallet.
 
@@ -335,6 +338,8 @@ explicit error from the server).
 
 #### `err_sig`
 
+FIXME: should we crash instead of handling this (potentially adversarial) scenario ?
+
 Sent by a wallet to express its dreadful unhapiness with one of the returned signatures.
 It results in the server erasing all the signatures for this transaction and make other
 wallets send a new signature.
@@ -365,11 +370,11 @@ transaction, but only once.
 
 ```
   WALLET                      COSIG_SERVER
-    ||   -A-- sign  -------->    ||   // A: I need you to sign this transaction
+    ||   -A-- sign  -------->    ||   // A: I need you to sign this transaction input
     ||   <-- sign result ----    ||   // Server: *signs* .. Here you go.
     ||
-    ||   -B-- sign  -------->    ||   // B: I need you to sign this same transaction
-    ||   <-- sign result ----    ||   // Server: I already signed a transaction spending this txid, here is the existing signature
+    ||   -B-- sign  -------->    ||   // B: I need you to sign this same transaction input
+    ||   <-- sign result ----    ||   // Server: I already signed an input spending this txid, here is the existing signature
 ```
 
 ### Messages format
@@ -379,11 +384,15 @@ transaction, but only once.
 Sent at any point in time by a "trader" who'll soon attempt to unvault and spend a vault
 utxo.
 
+The `index` specifies which input should be signed by the cosigner, as a single spend
+transaction might spend from multiple vaults.
+
 ```json
 {
     "method": "sign",
     "params": {
-        "tx": "psbt"
+        "tx": "psbt",
+        "index": 0
     }
 }
 ```
