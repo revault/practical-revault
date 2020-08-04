@@ -1,6 +1,8 @@
 # Networking
 
-Each machine (co-signing server, watchtower, wallet client) requires the capacity to connect to the others over TCP (mediated by the sync server operating a SOCKS5 proxy), and to engage in a noise_kk (or noise_xk) handshake (using pre-shared static public keys) to establish an authenticated and encrypted channel. 
+Each machine (co-signing server, watchtower, wallet client) requires the capacity to connect to the others over TCP and to engage in a noise_kk (or noise_xk) handshake (using pre-shared static public keys) to establish an authenticated and encrypted channel. The connections between wallet clients and watchtowers will be mediated by the sync server. All communications will happen over tor. 
+
+> (TODO: define the processes for configuring tor, running an onion service, and connecting to onion services through SOCKS5 proxy.  
 
 ## API
 
