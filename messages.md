@@ -3,7 +3,7 @@
 A description of how information is exchanged between the different entities, as well as the
 flow of operations.
 
-This messages are exchanged on top of an encrypted and authenticated communication
+These messages are exchanged on top of an encrypted and authenticated communication
 channel.
 
 
@@ -29,22 +29,22 @@ For this matter we use the synchronisation server.
 
 ```
   WALLET                      WATCHTOWER
-    ||   -- sig emer A ---------->   ||  // Here is A's sig for the emergency transaction.
-    ||   -- sig emer_unvault B -->   ||  // Here is B's sig for the unvault emergency transaction.
-    ||   -- sig emer B  --------->   ||
-    ||   -- sig cancel A   ------>   ||
-                (....)
-    ||  <--- sig_ack  ---------      || // I succesfully built, checked, and stored revocation transactions.
+    ||   -- sig emer ------------>   ||  // Here are all sigs for the emergency transaction.
+    ||  <--- sig_ack  ---------      ||  // I succesfully re-constructed, checked, and stored this transaction.
+    ||   -- sig emer_unvault ---->   ||
+    ||  <--- sig_ack  ---------      ||
+    ||   -- sig cancel   -------->   ||
+    ||  <--- sig_ack  ---------      ||
 ```
 
 ```
   WATCHTOWER                      SYNC_SERVER
     ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
     ||  <--- spend_requests  -----   ||  // Nope.
-    ||
+
     ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
     ||  <--- spend_requests  -----   ||  // Yep.
-    ||   -- spend_opinion  ------>   ||  // The policy I enforce agree / disagree with this spend attempt.
+    ||   -- spend_opinion  ------>   ||  // The policy I enforce agrees / disagrees with this spend attempt.
 ```
 
 ```
@@ -63,40 +63,39 @@ For this matter we use the synchronisation server.
 
 #### `sig`
 
-Sent at any point in time by a wallet to share a revocation transaction signature with its
-watchtower. The wallet must wait for the tower's `sig_ack` before sharing its signature
-for the unvault transaction.
+Sent at any point in time by a wallet to share all signatures for a revocation transaction with its
+watchtower. The wallet must wait for the tower's `sig_ack` on all revocation transactions before
+sharing its signature for the unvault transaction with the other participants.
 
 ```json
 {
     "method": "sig",
     "params": {
-        "signature": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-        "id": "tx uid"
+        "signatures": {
+            "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+            "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+            ...
+        },
+        "txid": "txid",
+        "vault_txid": "vault transaction txid"
     }
 }
 ```
 
-The `tx uid` is `sha256(txid)`.
-
 
 #### `sig_ack`
 
-The watchtower must not send an ACK if it did not build and check the transactions, or
-if it is unable to bump the feerate with its current utxos.
-FIXME: What is a reasonable limit for a WT to not send the ACK because of insufficient
-funds ?
+The watchtower must not send an ACK if it did not successfully reconstruct and check
+the transaction, *or if it is unable to bump its feerate with its currently-available utxos*.
 
 ```json
 {
     "result": {
         "ack": true,
-        "vault_id": "vault_uid"
+        "txid": "txid"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `get_spend_requests`
@@ -153,7 +152,7 @@ the wallet.
         "vault_id": "vault_uid",
         "accept": true,
         "reason": "",
-        "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
     }
 }
 ```
