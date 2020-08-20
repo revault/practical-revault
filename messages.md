@@ -296,6 +296,7 @@ flag.
 {
     "method": "sig",
     "params": {
+        "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
         "signature": "Bitcoin ECDSA signature as hex",
         "id": "tx uid"
     }
@@ -320,16 +321,20 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 }
 ```
 
-The server answers with a (possibly incomplete) list of the signatures for this
-transaction.
+The server answers with a (possibly incomplete) mapping of each pubkey to each signature
+required for this transaction.
 
 ```json
 {
     "result": {
-        "signatures": ["sigA", null, "sigC"]
+        "signatures": {
+            "pukeyA": "sig",
+            "pubkeyC": "sig"
+        }
     }
 }
 ```
+Note the absence of `pubkeyB` above.
 
 If a wallet notices its transaction to be absent, it must send it again. It can either
 mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
