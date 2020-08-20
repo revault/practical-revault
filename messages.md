@@ -246,6 +246,7 @@ As each wallet will verify and store signatures locally, the server isn't truste
 managed by the organisation deploying Revault.
 
 All transactions are signed paying a fixed 253perkw feerate.
+FIXME: see https://github.com/re-vault/practical-revault/issues/15
 
 
 ### Rough flow
@@ -281,14 +282,14 @@ All transactions are signed paying a fixed 253perkw feerate.
 #### `sig`
 
 Sent by a wallet at any point in time to share the signature for a transaction with
-everyone.
+all participants.
 
 The wallet can safely post its signature for both the `cancel` and `emergency` of each
 `vault` utxo without waiting for others. However, it must wait for everyone to have signed
 the `cancel` and `emergency` transactions and its watchtower to have verified and stored
 the signature before sharing its signature for the unvault transaction.
 
-Revocation transaction (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
+Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
 
 ```json
@@ -314,7 +315,7 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 {
     "method": "get_sigs",
     "params": {
-        "id": "tx uuid"
+        "id": "tx uid"
     }
 }
 ```
@@ -349,7 +350,7 @@ This should not happen, but hey.
 {
     "method": "err_sig",
     "params": {
-        "id": "tx uuid"
+        "id": "tx uid"
     }
 }
 ```
@@ -363,7 +364,7 @@ This should not happen, but hey.
 ## Cosigning server
 
 A cosigning server is ran by each non-fund-manager participant. It is happy to sign any
-transaction, but only once.
+transaction input, but only once.
 
 ### Rough flow
 
@@ -380,7 +381,7 @@ transaction, but only once.
 
 #### `sign`
 
-Sent at any point in time by a "trader" who'll soon attempt to unvault and spend a vault
+Sent at any point in time by a manager who'll soon attempt to unvault and spend a vault
 utxo.
 
 The `index` specifies which input should be signed by the cosigner, as a single spend
