@@ -3,7 +3,7 @@
 A description of how information is exchanged between the different entities, as well as the
 flow of operations.
 
-This messages are exchanged on top of an encrypted and authenticated communication
+These messages are exchanged on top of an encrypted and authenticated communication
 channel.
 
 
@@ -29,22 +29,22 @@ For this matter we use the synchronisation server.
 
 ```
   WALLET                      WATCHTOWER
-    ||   -- sig emer A ---------->   ||  // Here is A's sig for the emergency transaction.
-    ||   -- sig emer_unvault B -->   ||  // Here is B's sig for the unvault emergency transaction.
-    ||   -- sig emer B  --------->   ||
-    ||   -- sig cancel A   ------>   ||
-                (....)
-    ||  <--- sig_ack  ---------      || // I succesfully built, checked, and stored revocation transactions.
+    ||   -- sig emer ------------>   ||  // Here are all sigs for the emergency transaction.
+    ||  <--- sig_ack  ---------      ||  // I succesfully re-constructed, checked, and stored this transaction.
+    ||   -- sig emer_unvault ---->   ||
+    ||  <--- sig_ack  ---------      ||
+    ||   -- sig cancel   -------->   ||
+    ||  <--- sig_ack  ---------      ||
 ```
 
 ```
   WATCHTOWER                      SYNC_SERVER
     ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
     ||  <--- spend_requests  -----   ||  // Nope.
-    ||
+
     ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
     ||  <--- spend_requests  -----   ||  // Yep.
-    ||   -- spend_opinion  ------>   ||  // The policy I enforce agree / disagree with this spend attempt.
+    ||   -- spend_opinion  ------>   ||  // The policy I enforce agrees / disagrees with this spend attempt.
 ```
 
 ```
@@ -63,40 +63,39 @@ For this matter we use the synchronisation server.
 
 #### `sig`
 
-Sent at any point in time by a wallet to share a revocation transaction signature with its
-watchtower. The wallet must wait for the tower's `sig_ack` before sharing its signature
-for the unvault transaction.
+Sent at any point in time by a wallet to share all signatures for a revocation transaction with its
+watchtower. The wallet must wait for the tower's `sig_ack` on all revocation transactions before
+sharing its signature for the unvault transaction with the other participants.
 
 ```json
 {
     "method": "sig",
     "params": {
-        "signature": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-        "id": "tx uid"
+        "signatures": {
+            "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+            "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+            ...
+        },
+        "txid": "txid",
+        "vault_txid": "vault transaction txid"
     }
 }
 ```
 
-The `tx uid` is `sha256(txid)`.
-
 
 #### `sig_ack`
 
-The watchtower must not send an ACK if it did not build and check the transactions, or
-if it is unable to bump the feerate with its current utxos.
-FIXME: What is a reasonable limit for a WT to not send the ACK because of insufficient
-funds ?
+The watchtower must not send an ACK if it did not successfully reconstruct and check
+the transaction, *or if it is unable to bump its feerate with its currently-available utxos*.
 
 ```json
 {
     "result": {
         "ack": true,
-        "vault_id": "vault_uid"
+        "txid": "txid"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `get_spend_requests`
@@ -153,7 +152,7 @@ the wallet.
         "vault_id": "vault_uid",
         "accept": true,
         "reason": "",
-        "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
     }
 }
 ```
@@ -247,6 +246,7 @@ As each wallet will verify and store signatures locally, the server isn't truste
 managed by the organisation deploying Revault.
 
 All transactions are signed paying a fixed 253perkw feerate.
+FIXME: see https://github.com/re-vault/practical-revault/issues/15
 
 
 ### Rough flow
@@ -282,20 +282,21 @@ All transactions are signed paying a fixed 253perkw feerate.
 #### `sig`
 
 Sent by a wallet at any point in time to share the signature for a transaction with
-everyone.
+all participants.
 
 The wallet can safely post its signature for both the `cancel` and `emergency` of each
 `vault` utxo without waiting for others. However, it must wait for everyone to have signed
 the `cancel` and `emergency` transactions and its watchtower to have verified and stored
 the signature before sharing its signature for the unvault transaction.
 
-Revocation transaction (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
+Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
 
 ```json
 {
     "method": "sig",
     "params": {
+        "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
         "signature": "Bitcoin ECDSA signature as hex",
         "id": "tx uid"
     }
@@ -315,21 +316,25 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 {
     "method": "get_sigs",
     "params": {
-        "id": "tx uuid"
+        "id": "tx uid"
     }
 }
 ```
 
-The server answers with a (possibly incomplete) list of the signatures for this
-transaction.
+The server answers with a (possibly incomplete) mapping of each pubkey to each signature
+required for this transaction.
 
 ```json
 {
     "result": {
-        "signatures": ["sigA", null, "sigC"]
+        "signatures": {
+            "pukeyA": "sig",
+            "pubkeyC": "sig"
+        }
     }
 }
 ```
+Note the absence of `pubkeyB` above.
 
 If a wallet notices its transaction to be absent, it must send it again. It can either
 mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
@@ -350,7 +355,7 @@ This should not happen, but hey.
 {
     "method": "err_sig",
     "params": {
-        "id": "tx uuid"
+        "id": "tx uid"
     }
 }
 ```
@@ -364,7 +369,7 @@ This should not happen, but hey.
 ## Cosigning server
 
 A cosigning server is ran by each non-fund-manager participant. It is happy to sign any
-transaction, but only once.
+transaction input, but only once.
 
 ### Rough flow
 
@@ -381,7 +386,7 @@ transaction, but only once.
 
 #### `sign`
 
-Sent at any point in time by a "trader" who'll soon attempt to unvault and spend a vault
+Sent at any point in time by a manager who'll soon attempt to unvault and spend a vault
 utxo.
 
 The `index` specifies which input should be signed by the cosigner, as a single spend
