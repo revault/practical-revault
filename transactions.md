@@ -73,7 +73,7 @@ unvault_witness_script = and(thresh(len(managers), managers), or(1@thresh(len(no
 
 ```
 unvault_cpfp_descriptor = wsh(unvault_cpfp_witness_script)
-unvault_cpfp_witness_script = thresh(M, pubkey1, pubkey2, ..., pubkeyM)
+unvault_cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM)
 ```
 
 ## spend_tx
