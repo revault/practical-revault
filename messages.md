@@ -284,13 +284,24 @@ FIXME: see https://github.com/re-vault/practical-revault/issues/15
 Sent by a wallet at any point in time to share the signature for a transaction with
 all participants.
 
-The wallet can safely post its signature for both the `cancel` and `emergency` of each
+The wallet can safely post its signature for the `cancel` and `emergency`s of each
 `vault` utxo without waiting for others. However, it must wait for everyone to have signed
 the `cancel` and `emergency` transactions and its watchtower to have verified and stored
-the signature before sharing its signature for the unvault transaction.
+the signature before possibly sharing its signature for the unvault transaction.
+
+A wallet is not bound to share its signature for the unvault transaction. This flexibility
+allows "unactive vaults": a multisig which is not spendable by default but still guarded
+by the emergency transaction deterrent.  
+A wallet must share its signature for the `cancel` and the unvault `emergency` transaction
+nonetheless.  
+An inactive vault may later become active by sharing signatures for the `unvault`
+transaction.  
 
 Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
+
+FIXME: Note that we use a cheap obfuscation for the funding txid but it's actually trivial
+to reconstruct the funding script with the below informations.
 
 ```json
 {
