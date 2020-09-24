@@ -9,7 +9,7 @@ channel.
 
 - [Watchtower](#watchtower)
 - [Cosigning server](#cosigning-server)
-- [Synchronisation server](#sync-server)
+- [Synchronisation server](#synchronisation-server)
 
 
 
@@ -237,13 +237,20 @@ to validate the signature.
 
 
 
-## Sync server
+## Synchronisation server
 
 The sync server allows wallets to exchange signatures without the need for them to be
 interconnected.
 
 As each wallet will verify and store signatures locally, the server isn't trusted and can be
-managed by the organisation deploying Revault.
+managed by the organisation deploying Revault itself or any third party without risking any
+loss of funds.
+
+Acting as a cache in place of -example given- a p2p network, the information stored on the
+synchronisation server is transient. It may be gradually deleted, for example with a
+lifetime of 2 weeks which we think is a good tradeoff between a smoother user experience
+(up to 2 weeks of gap between the first and last signatory for a vault) on one side, and
+operation cost *as well as reliance on it* on the other side.
 
 All transactions are signed paying a fixed 253perkw feerate.
 FIXME: see https://github.com/re-vault/practical-revault/issues/15
