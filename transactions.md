@@ -2,12 +2,12 @@
 
 All transactions are version 2 and use version 0 native Segwit scripts.
 
-We use [miniscript](http://bitcoin.sipa.be/miniscript/) and descriptors to generally
+We use [miniscript](http://bitcoin.sipa.be/miniscript/) and output descriptors to generally
 describe outputs spending policies.
 
-We denote `N` the number of participants, `M` the number of managers (the subset
-of the participants allowed to unlock the unvault transaction output along with the
-cosigning servers), and `X` the CSV value in the unvault transaction.
+We denote `N` the number of stakeholders, `M` the number of fund managers (allowed
+to unlock the unvault transaction output along with the cosigning servers after a timeout),
+and `X` the CSV value in the unvault transaction.
 
 - [vault_tx](#vault_tx)
 - [unvault_tx](#unvault_tx)
@@ -38,8 +38,8 @@ vault_witness_script = thresh(N, pubkey1, pubkey2, ..., pubkeyN)
 ## unvault_tx
 
 The transaction which spends the [`vault_tx`](vault_tx) deposit output, and creates an
-unvault output only spendable by the managers (along with the cosigning servers)
-after `X` blocks.
+unvault output spendable by the `N` stakeholders or the managers (along with the cosigning
+servers) after `X` blocks.
 
 - version: 2
 - locktime: 0
@@ -50,7 +50,7 @@ after `X` blocks.
 - inputs[0]:
     - txid: `<vault_tx txid>`
     - vout: N/A
-    - sequence: `0xffffffff`
+    - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
     - witness: `satisfy(vault_descriptor)`
 
@@ -68,12 +68,12 @@ after `X` blocks.
 With:
 ```
 unvault_descriptor = wsh(unvault_witness_script)
-unvault_witness_script = and(thresh(len(managers), managers), or(1@thresh(len(non_managers), non_managers), 10@and(thresh(len(cosigners), cosigners), older(X))))
+unvault_witness_script = or(1@thresh(len(stakeholders), stakeholders), 9@and(thresh(len(managers), managers), and(thresh(len(cosigners), cosigners), older(X))))
 ```
 
 ```
 unvault_cpfp_descriptor = wsh(unvault_cpfp_witness_script)
-unvault_cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM)
+unvault_cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM) # The pubkeys being the managers'
 ```
 
 ## spend_tx
@@ -115,7 +115,7 @@ vault txout (it is therefore another deposit transaction).
 - inputs[0]:
     - txid: `<unvault_tx txid>`
     - vout: 0
-    - sequence: `0xfffffffe`
+    - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
     - witness: `satisfy(unvault_descriptor)`
 
@@ -131,13 +131,13 @@ vault txout (it is therefore another deposit transaction).
 
 Emergency transactions are used as deterrents against threat. They lock coins to what we
 call an EDV (Emergency Deep Vault): a script chosen by the participants and kept
-obfuscated by the properties of P2(W)SH, as the emergency transactions are never meant
+obfuscated by the properties of P2WSH, as the emergency transactions are never meant
 to be used.
 
 
 ### vault_emergency_tx
 
-This transaction spends the `vault_tx` to the EDV.
+This transaction spends the `vault_tx` to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
@@ -148,7 +148,7 @@ This transaction spends the `vault_tx` to the EDV.
 - inputs[0]:
     - txid: `<vault_tx txid>`
     - vout: N/A
-    - sequence: `0xfffffffe`
+    - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
     - witness: `satisfy(vault_descriptor)`
 
@@ -162,7 +162,7 @@ This transaction spends the `vault_tx` to the EDV.
 
 ### unvault_emergency_tx
 
-This transaction spends the `unvault_tx` to the EDV.
+This transaction spends the `unvault_tx` to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
@@ -173,7 +173,7 @@ This transaction spends the `unvault_tx` to the EDV.
 - inputs[0]:
     - txid: `<unvault_tx txid>`
     - vout: 0
-    - sequence: `0xfffffffe`
+    - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
     - witness: `satisfy(unvault_descriptor)`
 
