@@ -404,30 +404,31 @@ transaction input, but only once.
 
 #### `sign`
 
-Sent at any point in time by a manager who'll soon attempt to unvault and spend a vault
-utxo.
+Sent at any point in time by a manager who'll soon attempt to unvault and spend one or
+more vault utxo.
 
-The `index` specifies which input should be signed by the cosigner, as a single spend
-transaction might spend from multiple vaults.
+As the spend transaction must only spend unvault transaction outputs, the cosigning server
+shall sign all inputs (if all of them were not already signed).
 
 ```json
 {
     "method": "sign",
     "params": {
-        "tx": "psbt",
-        "index": 0
+        "tx": "psbt"
     }
 }
 ```
 
-The server shall return the existing signature if it already signed a transaction spending
-this txid (no matter the actual transaction), or sign it, store this sig for future use,
-then return it (once again, no matter the actual transaction).
+The server must:
+  - if any input was already signed
+    - return the empty string `""`
+  - else
+    - return the PSBT with its signature appended for all inputs
 
 ```json
 {
     "result": {
-        "signature": "sig as hex"
+        "tx": "psbt"
     }
 }
 ```
