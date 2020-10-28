@@ -15,20 +15,21 @@ channel.
 
 ## Watchtower
 
-At least one watchtower is ran by every participant, and at most one wallet is paired with
+At least one watchtower is ran by every stakeholder, and at most one wallet is paired with
 each watchtower. A watchtower needs to be able to sign any revocation transaction before
 its corresponding wallet signs the unvaulting transaction.
 
 In addition, a watchtower will by default revault any unvaulting attempt. We need a way
 for a manager to signal its willingness to spend a vault, and for the
 watchtower to ACK or NACK it (cheaper and less onchain footprint than try-and-be-canceled).  
-For this matter we use the synchronisation server.
+For this matter we use the synchronisation server as a proxy between the managers and the
+watchtowers.
 
 
 ### Rough flow
 
 ```
-  WALLET                      WATCHTOWER
+ STAKEHOLDER's WALLET                      WATCHTOWER
     ||   -- sig emer ------------>   ||  // Here are all sigs for the emergency transaction.
     ||  <--- sig_ack  ---------      ||  // I succesfully re-constructed, checked, and stored this transaction.
     ||   -- sig emer_unvault ---->   ||
@@ -52,9 +53,10 @@ For this matter we use the synchronisation server.
 
 #### `sig`
 
-Sent at any point in time by a wallet to share all signatures for a revocation transaction with its
-watchtower. The wallet must wait for the tower's `sig_ack` on all revocation transactions before
-sharing its signature for the unvault transaction with the other participants.
+Sent at any point in time by a stakeholder's wallet to share all signatures for a revocation
+transaction with its watchtower. The wallet must wait for the tower's `sig_ack` on all
+revocation transactions before sharing its signature for the unvault transaction with the other
+participants.
 
 ```json
 {
@@ -156,8 +158,9 @@ The `vault_uid` is `sha256(vault txid)`.
 
 ## Synchronisation server
 
-The sync server allows wallets to exchange signatures without the need for them to be
-interconnected.
+The sync server allows stakeholders' wallets to exchange signatures without the need for them
+to be interconnected, and managers' wallets to poll watchtowers without direct connections
+to them.
 
 As each wallet will verify and store signatures locally, the server isn't trusted and can be
 managed by the organisation deploying Revault itself or any third party without risking any
@@ -216,8 +219,8 @@ FIXME: see https://github.com/re-vault/practical-revault/issues/15
 
 #### `sig`
 
-Sent by a wallet at any point in time to share the signature for a transaction with
-all participants.
+Sent by a stakeholder wallet at any point in time to share the signature for a transaction
+with all participants.
 
 The wallet can safely post its signature for the `cancel` and `emergency`s of each
 `vault` utxo without waiting for others. However, it must wait for everyone to have signed
@@ -227,8 +230,8 @@ the signature before possibly sharing its signature for the unvault transaction.
 A wallet is not bound to share its signature for the unvault transaction. This flexibility
 allows "unactive vaults": a multisig which is not spendable by default but still guarded
 by the emergency transaction deterrent.  
-A wallet must share its signature for the `cancel` and the unvault `emergency` transaction
-nonetheless.  
+A wallet must share its signature for the `cancel` and the unvault `emergency`
+transactions nonetheless.  
 An inactive vault may later become active by sharing signatures for the `unvault`
 transaction.  
 
@@ -257,6 +260,7 @@ No explicit ACK from the server as the wallet can just `get_sigs` for its own si
 #### `get_sigs`
 
 Sent by a wallet to retrieve all signatures for a specific transaction.
+FIXME: managers' wallets can currently get all signatures !!
 
 ```json
 {
@@ -386,8 +390,8 @@ to validate the signature.
 
 ## Cosigning server
 
-A cosigning server is ran by each non-fund-manager participant. It is happy to sign any
-transaction input, but only once.
+A cosigning server is ran by each stakeholder. It is happy to sign any transaction input
+it can, but only once.
 
 ### Rough flow
 
