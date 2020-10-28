@@ -46,6 +46,11 @@ watchtowers.
     ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
     ||  <--- spend_requests  -----   ||  // Yep.
     ||   -- spend_opinion  ------>   ||  // The policy I enforce agrees / disagrees with this spend attempt.
+    ||   -- get_finalized_spends ->  ||  // Did they share the fully signed PSBT yet ?
+    ||  <--- finalized_spends ----   ||  // Nope.
+    ||   -- get_finalized_spends ->  ||  // What about now ?
+    ||  <--- finalized_spends ----   ||  // Yep here is what they claim it to be.
+    ||  --- validate_spend  ----->   ||  // Fine. Go ahead managers!
 ```
 
 
@@ -104,17 +109,17 @@ attempts.
 
 #### `spend_requests`
 
-The response to a `get_spend_requests`. Returns an arbitrarily-sized (can be 0) array of
-objects detailing a spending request.
+The response to a `get_spend_requests`. Returns an arbitrarily-sized (can be 0)
+array of objects detailing a spending request.
 
 ```json
 {
     "result": {
         "requests": [
             {
-                "transaction": "fully signed spend transaction",
                 "timestamp": 0000000,
-                "vault_id": "vault_uid"
+                "vault_id": "vault_uid",
+                "spend_tx": "unsigned spend tx (PSBT format)"
             }
         ]
     }
@@ -149,6 +154,65 @@ the wallet.
 ```
 
 The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `get_finalized_spends`
+
+Regularly sent by a watchtower to the synchronisation server after having received
+a `spend_request` to learn about finalized spending attempts.
+
+```json
+{
+    "method": "get_finalized_spends",
+    "params": {}
+}
+```
+
+
+#### `finalized_spends`
+
+The response to a `get_final_spend_requests`. Returns an arbitrarily-sized (can be 0)
+array of objects detailing a finalized (ie with a fully-signed spend transaction)
+spending request.
+
+```json
+{
+    "result": {
+        "requests": [
+            {
+                "transaction": "fully signed spend transaction (PSBT format)",
+                "vault_id": "vault_uid"
+            }
+        ]
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `validate_spend`
+
+Sent by a watchtower to the synchronisation server to signal its acknowledgement
+or refusal of a fully-signed spend transaction.
+
+It has the same entries as the `spend_opinion` message, and should under normal
+circumstances (managers didn't try to cheat) have the same content semantic as well.
+
+```json
+{
+    "method": "spend_validation",
+    "params": {
+        "vault_id": "vault_uid",
+        "accept": true,
+        "reason": "",
+        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
 
 
 
@@ -213,6 +277,10 @@ FIXME: see https://github.com/re-vault/practical-revault/issues/15
                 (....)
     ||   -- get_spend_opinions -->   ||
     ||  <--- spend_opinions  -----   ||  // Eventually all watchtowers responded.
+              (..sig..)
+    ||   -- finalize_spend  ----->   ||  // Ok we and the cosigners signed, here is the tx
+    ||   - get_spend_validations ->  ||  // Do watchtowers let me be now ?
+    ||   <-- spend_validations ---   ||  // Yep, go ahead.
 ```
 
 ### Messages format
@@ -321,9 +389,9 @@ We use a timestamp as watchtowers might accept the same spending attempt in the 
 {
     "method": "request_spend",
     "params": {
-        "transaction": "fully signed spend transaction",
         "timestamp": 0000000,
-        "vault_id": "vault_uid"
+        "vault_id": "vault_uid",
+        "spend_tx": "unsigned spend tx (PSBT format)"
     }
 }
 ```
@@ -351,6 +419,77 @@ The `vault_uid` is `sha256(vault txid)`.
 #### `spend_opinions`
 
 The response to `get_spend_opinions`, an arbitrarily-sized (can be 0 if no watchtower
+responded) array of the response of each watchtower.
+
+```json
+{
+    "result": {
+        "vault_id": "vault_uid",
+        "opinions": [
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            },
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            },
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            }
+        ]
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.  
+The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
+to validate the signature.
+
+
+
+#### `finalize_spend`
+
+Sent by a manager to finalize their spending attempt by presenting the fully-signed spend
+transaction to the watchtowers.
+
+```json
+{
+    "method": "finalize_spend",
+    "params": {
+        "transaction": "fully signed spend transaction (PSBT format)",
+        "vault_id": "vault_uid"
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `get_spend_validations`
+
+Sent by a manager when polling for watchtowers acknowledgement of the fully signed
+transaction spending the vault identified by `vault_id`.
+
+```json
+{
+    "method": "get_spend_validations",
+    "params": {
+        "vault_id": "vault_uid"
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `spend_validations`
+
+The response to `get_spend_validations`, an arbitrarily-sized (can be 0 if no watchtower
 responded) array of the response of each watchtower.
 
 ```json
