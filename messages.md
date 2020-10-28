@@ -47,17 +47,6 @@ For this matter we use the synchronisation server.
     ||   -- spend_opinion  ------>   ||  // The policy I enforce agrees / disagrees with this spend attempt.
 ```
 
-```
- SPENDER's WALLET                SYNC_SERVER
-    ||   -- request_spend    ---->   ||  // I'd like to spend this vault.
-    ||   -- get_spend_requests -->   ||  // Just checking you made my request public..
-    ||   -- get_spend_opinions -->   ||  // What do watchtowers say about this spend ?
-    ||  <--- spend_opinions  -----   ||
-                (....)
-    ||   -- get_spend_opinions -->   ||
-    ||  <--- spend_opinions  -----   ||  // Eventually all watchtowers responded.
-```
-
 
 ### Messages format
 
@@ -160,78 +149,6 @@ the wallet.
 The `vault_uid` is `sha256(vault txid)`.
 
 
-#### `request_spend`
-
-Sent by a manager to signal their willingness to spend a vault.
-
-We use a timestamp as watchtowers might accept the same spending attempt in the future.
-
-```json
-{
-    "method": "request_spend",
-    "params": {
-        "transaction": "fully signed spend transaction",
-        "timestamp": 0000000,
-        "vault_id": "vault_uid"
-    }
-}
-```
-
-The `vault_uid` is `sha256(vault txid)`.
-
-
-#### `get_spend_opinions`
-
-Sent by a manager when polling for watchtowers agreement regarding the spend
-attempt identified by `vault_id`.
-
-```json
-{
-    "method": "get_spend_opinions",
-    "params": {
-        "vault_id": "vault_uid"
-    }
-}
-```
-
-The `vault_uid` is `sha256(vault txid)`.
-
-
-#### `spend_opinions`
-
-The response to `get_spend_opinions`, an arbitrarily-sized (can be 0 if no watchtower
-responded) array of the response of each watchtower.
-
-```json
-{
-    "result": {
-        "vault_id": "vault_uid",
-        "opinions": [
-            {
-                "accepted": true,
-                "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
-            },
-            {
-                "accepted": true,
-                "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
-            },
-            {
-                "accepted": true,
-                "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
-            }
-        ]
-    }
-}
-```
-
-The `vault_uid` is `sha256(vault txid)`.  
-The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
-to validate the signature.
-
-
 
 ------
 
@@ -259,7 +176,7 @@ FIXME: see https://github.com/re-vault/practical-revault/issues/15
 ### Rough flow
 
 ```
-  WALLET                      SYNC_SERVER
+ STAKEHOLDER's WALLET          SYNC_SERVER
     ||   -A-- sig   -------->    ||   // A: Here is a sig for this id !
     ||   -C-- sig   -------->    ||
     ||   -B-- sig   -------->    ||
@@ -282,6 +199,17 @@ FIXME: see https://github.com/re-vault/practical-revault/issues/15
     ||   -C-- get_sigs  ---->    ||
             ...(polling)
             ...(polling)              // Eventually they all retrieve the sigs.
+```
+
+```
+
+ MANAGER's WALLET                SYNC_SERVER
+    ||   -- request_spend    ---->   ||  // I'd like to spend this vault.
+    ||   -- get_spend_opinions -->   ||  // What do watchtowers say about this spend ?
+    ||  <--- spend_opinions  -----   ||
+                (....)
+    ||   -- get_spend_opinions -->   ||
+    ||  <--- spend_opinions  -----   ||  // Eventually all watchtowers responded.
 ```
 
 ### Messages format
@@ -377,6 +305,78 @@ This should not happen, but hey.
     }
 }
 ```
+
+
+#### `request_spend`
+
+Sent by a manager to signal their willingness to spend a vault.
+
+We use a timestamp as watchtowers might accept the same spending attempt in the future.
+
+```json
+{
+    "method": "request_spend",
+    "params": {
+        "transaction": "fully signed spend transaction",
+        "timestamp": 0000000,
+        "vault_id": "vault_uid"
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `get_spend_opinions`
+
+Sent by a manager when polling for watchtowers agreement regarding the spend
+attempt identified by `vault_id`.
+
+```json
+{
+    "method": "get_spend_opinions",
+    "params": {
+        "vault_id": "vault_uid"
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `spend_opinions`
+
+The response to `get_spend_opinions`, an arbitrarily-sized (can be 0 if no watchtower
+responded) array of the response of each watchtower.
+
+```json
+{
+    "result": {
+        "vault_id": "vault_uid",
+        "opinions": [
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            },
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            },
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            }
+        ]
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.  
+The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
+to validate the signature.
 
 
 
