@@ -15,20 +15,21 @@ channel.
 
 ## Watchtower
 
-At least one watchtower is ran by every participant, and at most one wallet is paired with
+At least one watchtower is ran by every stakeholder, and at most one wallet is paired with
 each watchtower. A watchtower needs to be able to sign any revocation transaction before
 its corresponding wallet signs the unvaulting transaction.
 
 In addition, a watchtower will by default revault any unvaulting attempt. We need a way
 for a manager to signal its willingness to spend a vault, and for the
 watchtower to ACK or NACK it (cheaper and less onchain footprint than try-and-be-canceled).  
-For this matter we use the synchronisation server.
+For this matter we use the synchronisation server as a proxy between the managers and the
+watchtowers.
 
 
 ### Rough flow
 
 ```
-  WALLET                      WATCHTOWER
+ STAKEHOLDER's WALLET                      WATCHTOWER
     ||   -- sig emer ------------>   ||  // Here are all sigs for the emergency transaction.
     ||  <--- sig_ack  ---------      ||  // I succesfully re-constructed, checked, and stored this transaction.
     ||   -- sig emer_unvault ---->   ||
@@ -45,17 +46,11 @@ For this matter we use the synchronisation server.
     ||   -- get_spend_requests -->   ||  // Is anyone currently willing to spend a vault ?
     ||  <--- spend_requests  -----   ||  // Yep.
     ||   -- spend_opinion  ------>   ||  // The policy I enforce agrees / disagrees with this spend attempt.
-```
-
-```
- SPENDER's WALLET                SYNC_SERVER
-    ||   -- request_spend    ---->   ||  // I'd like to spend this vault.
-    ||   -- get_spend_requests -->   ||  // Just checking you made my request public..
-    ||   -- get_spend_opinions -->   ||  // What do watchtowers say about this spend ?
-    ||  <--- spend_opinions  -----   ||
-                (....)
-    ||   -- get_spend_opinions -->   ||
-    ||  <--- spend_opinions  -----   ||  // Eventually all watchtowers responded.
+    ||   -- get_finalized_spends ->  ||  // Did they share the fully signed PSBT yet ?
+    ||  <--- finalized_spends ----   ||  // Nope.
+    ||   -- get_finalized_spends ->  ||  // What about now ?
+    ||  <--- finalized_spends ----   ||  // Yep here is what they claim it to be.
+    ||  --- validate_spend  ----->   ||  // Fine. Go ahead managers!
 ```
 
 
@@ -63,9 +58,10 @@ For this matter we use the synchronisation server.
 
 #### `sig`
 
-Sent at any point in time by a wallet to share all signatures for a revocation transaction with its
-watchtower. The wallet must wait for the tower's `sig_ack` on all revocation transactions before
-sharing its signature for the unvault transaction with the other participants.
+Sent at any point in time by a stakeholder's wallet to share all signatures for a revocation
+transaction with its watchtower. The wallet must wait for the tower's `sig_ack` on all
+revocation transactions before sharing its signature for the unvault transaction with the other
+participants.
 
 ```json
 {
@@ -113,17 +109,17 @@ attempts.
 
 #### `spend_requests`
 
-The response to a `get_spend_requests`. Returns an arbitrarily-sized (can be 0) array of
-objects detailing a spending request.
+The response to a `get_spend_requests`. Returns an arbitrarily-sized (can be 0)
+array of objects detailing a spending request.
 
 ```json
 {
     "result": {
         "requests": [
             {
-                "transaction": "fully signed spend transaction",
                 "timestamp": 0000000,
-                "vault_id": "vault_uid"
+                "vault_id": "vault_uid",
+                "spend_tx": "unsigned spend tx (PSBT format)"
             }
         ]
     }
@@ -160,6 +156,229 @@ the wallet.
 The `vault_uid` is `sha256(vault txid)`.
 
 
+#### `get_finalized_spends`
+
+Regularly sent by a watchtower to the synchronisation server after having received
+a `spend_request` to learn about finalized spending attempts.
+
+```json
+{
+    "method": "get_finalized_spends",
+    "params": {}
+}
+```
+
+
+#### `finalized_spends`
+
+The response to a `get_final_spend_requests`. Returns an arbitrarily-sized (can be 0)
+array of objects detailing a finalized (ie with a fully-signed spend transaction)
+spending request.
+
+```json
+{
+    "result": {
+        "requests": [
+            {
+                "transaction": "fully signed spend transaction (PSBT format)",
+                "vault_id": "vault_uid"
+            }
+        ]
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `validate_spend`
+
+Sent by a watchtower to the synchronisation server to signal its acknowledgement
+or refusal of a fully-signed spend transaction.
+
+It has the same entries as the `spend_opinion` message, and should under normal
+circumstances (managers didn't try to cheat) have the same content semantic as well.
+
+```json
+{
+    "method": "spend_validation",
+    "params": {
+        "vault_id": "vault_uid",
+        "accept": true,
+        "reason": "",
+        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
+    }
+}
+```
+
+The `vault_uid` is `sha256(vault txid)`.
+
+
+
+
+------
+
+
+
+## Synchronisation server
+
+The sync server allows stakeholders' wallets to exchange signatures without the need for them
+to be interconnected, and managers' wallets to poll watchtowers without direct connections
+to them.
+
+As each wallet will verify and store signatures locally, the server isn't trusted and can be
+managed by the organisation deploying Revault itself or any third party without risking any
+loss of funds.
+
+Acting as a cache in place of -example given- a p2p network, the information stored on the
+synchronisation server is transient. It may be gradually deleted, for example with a
+lifetime of 2 weeks which we think is a good tradeoff between a smoother user experience
+(up to 2 weeks of gap between the first and last signatory for a vault) on one side, and
+operation cost *as well as reliance on it* on the other side.
+
+All transactions are signed paying a fixed 253perkw feerate.
+FIXME: see https://github.com/re-vault/practical-revault/issues/15
+
+
+### Rough flow
+
+```
+ STAKEHOLDER's WALLET          SYNC_SERVER
+    ||   -A-- sig   -------->    ||   // A: Here is a sig for this id !
+    ||   -C-- sig   -------->    ||
+    ||   -B-- sig   -------->    ||
+    ||
+    ||   -C-- get_sigs  ---->    ||   // C: I gave my sig but now am waiting for everyone to complete..
+            ...(polling)
+    ||   -A-- get_sigs  ---->    ||
+            ...(polling)
+    ||   -B-- get_sigs  ---->    ||
+            ...(polling)
+    ||   -A-- err_sig   ---->    ||   // A: Huh lol. This sig isn't valid.
+    ||   <-- get_sigs error--    ||   // Server: Someone's is unhappy with the sig so I erased all of them, try again.
+    ||
+    ||   -A-- sig  --------->    ||
+    ||   -B-- sig  --------->    ||
+    ||   -C-- sig  --------->    ||
+    ||
+    ||   -A-- get_sigs  ---->    ||
+    ||   -B-- get_sigs  ---->    ||
+    ||   -C-- get_sigs  ---->    ||
+            ...(polling)
+            ...(polling)              // Eventually they all retrieve the sigs.
+```
+
+```
+
+ MANAGER's WALLET                SYNC_SERVER
+    ||   -- request_spend    ---->   ||  // I'd like to spend this vault.
+    ||   -- get_spend_opinions -->   ||  // What do watchtowers say about this spend ?
+    ||  <--- spend_opinions  -----   ||
+                (....)
+    ||   -- get_spend_opinions -->   ||
+    ||  <--- spend_opinions  -----   ||  // Eventually all watchtowers responded.
+              (..sig..)
+    ||   -- finalize_spend  ----->   ||  // Ok we and the cosigners signed, here is the tx
+    ||   - get_spend_validations ->  ||  // Do watchtowers let me be now ?
+    ||   <-- spend_validations ---   ||  // Yep, go ahead.
+```
+
+### Messages format
+
+#### `sig`
+
+Sent by a stakeholder wallet at any point in time to share the signature for a transaction
+with all participants.
+
+The wallet can safely post its signature for the `cancel` and `emergency`s of each
+`vault` utxo without waiting for others. However, it must wait for everyone to have signed
+the `cancel` and `emergency` transactions and its watchtower to have verified and stored
+the signature before possibly sharing its signature for the unvault transaction.
+
+A wallet is not bound to share its signature for the unvault transaction. This flexibility
+allows "unactive vaults": a multisig which is not spendable by default but still guarded
+by the emergency transaction deterrent.  
+A wallet must share its signature for the `cancel` and the unvault `emergency`
+transactions nonetheless.  
+An inactive vault may later become active by sharing signatures for the `unvault`
+transaction.  
+
+Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
+flag.
+
+FIXME: Note that we use a cheap obfuscation for the funding txid but it's actually trivial
+to reconstruct the funding script with the below informations.
+
+```json
+{
+    "method": "sig",
+    "params": {
+        "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
+        "signature": "Bitcoin ECDSA signature as hex",
+        "id": "tx uid"
+    }
+}
+```
+
+The `tx uid` is `sha256(txid)`. It's used when polling.
+
+No explicit ACK from the server as the wallet can just `get_sigs` for its own signature.
+
+
+#### `get_sigs`
+
+Sent by a wallet to retrieve all signatures for a specific transaction.
+FIXME: managers' wallets can currently get all signatures !!
+
+```json
+{
+    "method": "get_sigs",
+    "params": {
+        "id": "tx uid"
+    }
+}
+```
+
+The server answers with a (possibly incomplete) mapping of each pubkey to each signature
+required for this transaction.
+
+```json
+{
+    "result": {
+        "signatures": {
+            "pukeyA": "sig",
+            "pubkeyC": "sig"
+        }
+    }
+}
+```
+Note the absence of `pubkeyB` above.
+
+If a wallet notices its transaction to be absent, it must send it again. It can either
+mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
+explicit error from the server).
+
+
+#### `err_sig`
+
+FIXME: should we crash instead of handling this (potentially adversarial) scenario ?
+
+Sent by a wallet to express its dreadful unhapiness with one of the returned signatures.
+It results in the server erasing all the signatures for this transaction and make other
+wallets send a new signature.
+
+This should not happen, but hey.
+
+```json
+{
+    "method": "err_sig",
+    "params": {
+        "id": "tx uid"
+    }
+}
+```
+
+
 #### `request_spend`
 
 Sent by a manager to signal their willingness to spend a vault.
@@ -170,9 +389,9 @@ We use a timestamp as watchtowers might accept the same spending attempt in the 
 {
     "method": "request_spend",
     "params": {
-        "transaction": "fully signed spend transaction",
         "timestamp": 0000000,
-        "vault_id": "vault_uid"
+        "vault_id": "vault_uid",
+        "spend_tx": "unsigned spend tx (PSBT format)"
     }
 }
 ```
@@ -233,150 +452,74 @@ to validate the signature.
 
 
 
-------
+#### `finalize_spend`
 
-
-
-## Synchronisation server
-
-The sync server allows wallets to exchange signatures without the need for them to be
-interconnected.
-
-As each wallet will verify and store signatures locally, the server isn't trusted and can be
-managed by the organisation deploying Revault itself or any third party without risking any
-loss of funds.
-
-Acting as a cache in place of -example given- a p2p network, the information stored on the
-synchronisation server is transient. It may be gradually deleted, for example with a
-lifetime of 2 weeks which we think is a good tradeoff between a smoother user experience
-(up to 2 weeks of gap between the first and last signatory for a vault) on one side, and
-operation cost *as well as reliance on it* on the other side.
-
-All transactions are signed paying a fixed 253perkw feerate.
-FIXME: see https://github.com/re-vault/practical-revault/issues/15
-
-
-### Rough flow
-
-```
-  WALLET                      SYNC_SERVER
-    ||   -A-- sig   -------->    ||   // A: Here is a sig for this id !
-    ||   -C-- sig   -------->    ||
-    ||   -B-- sig   -------->    ||
-    ||
-    ||   -C-- get_sigs  ---->    ||   // C: I gave my sig but now am waiting for everyone to complete..
-            ...(polling)
-    ||   -A-- get_sigs  ---->    ||
-            ...(polling)
-    ||   -B-- get_sigs  ---->    ||
-            ...(polling)
-    ||   -A-- err_sig   ---->    ||   // A: Huh lol. This sig isn't valid.
-    ||   <-- get_sigs error--    ||   // Server: Someone's is unhappy with the sig so I erased all of them, try again.
-    ||
-    ||   -A-- sig  --------->    ||
-    ||   -B-- sig  --------->    ||
-    ||   -C-- sig  --------->    ||
-    ||
-    ||   -A-- get_sigs  ---->    ||
-    ||   -B-- get_sigs  ---->    ||
-    ||   -C-- get_sigs  ---->    ||
-            ...(polling)
-            ...(polling)              // Eventually they all retrieve the sigs.
-```
-
-### Messages format
-
-#### `sig`
-
-Sent by a wallet at any point in time to share the signature for a transaction with
-all participants.
-
-The wallet can safely post its signature for the `cancel` and `emergency`s of each
-`vault` utxo without waiting for others. However, it must wait for everyone to have signed
-the `cancel` and `emergency` transactions and its watchtower to have verified and stored
-the signature before possibly sharing its signature for the unvault transaction.
-
-A wallet is not bound to share its signature for the unvault transaction. This flexibility
-allows "unactive vaults": a multisig which is not spendable by default but still guarded
-by the emergency transaction deterrent.  
-A wallet must share its signature for the `cancel` and the unvault `emergency` transaction
-nonetheless.  
-An inactive vault may later become active by sharing signatures for the `unvault`
-transaction.  
-
-Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
-flag.
-
-FIXME: Note that we use a cheap obfuscation for the funding txid but it's actually trivial
-to reconstruct the funding script with the below informations.
+Sent by a manager to finalize their spending attempt by presenting the fully-signed spend
+transaction to the watchtowers.
 
 ```json
 {
-    "method": "sig",
+    "method": "finalize_spend",
     "params": {
-        "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
-        "signature": "Bitcoin ECDSA signature as hex",
-        "id": "tx uid"
+        "transaction": "fully signed spend transaction (PSBT format)",
+        "vault_id": "vault_uid"
     }
 }
 ```
 
-The `tx uid` is `sha256(txid)`. It's used when polling.
-
-No explicit ACK from the server as the wallet can just `get_sigs` for its own signature.
+The `vault_uid` is `sha256(vault txid)`.
 
 
-#### `get_sigs`
+#### `get_spend_validations`
 
-Sent by a wallet to retrieve all signatures for a specific transaction.
+Sent by a manager when polling for watchtowers acknowledgement of the fully signed
+transaction spending the vault identified by `vault_id`.
 
 ```json
 {
-    "method": "get_sigs",
+    "method": "get_spend_validations",
     "params": {
-        "id": "tx uid"
+        "vault_id": "vault_uid"
     }
 }
 ```
 
-The server answers with a (possibly incomplete) mapping of each pubkey to each signature
-required for this transaction.
+The `vault_uid` is `sha256(vault txid)`.
+
+
+#### `spend_validations`
+
+The response to `get_spend_validations`, an arbitrarily-sized (can be 0 if no watchtower
+responded) array of the response of each watchtower.
 
 ```json
 {
     "result": {
-        "signatures": {
-            "pukeyA": "sig",
-            "pubkeyC": "sig"
-        }
+        "vault_id": "vault_uid",
+        "opinions": [
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            },
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            },
+            {
+                "accepted": true,
+                "reason": "",
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+            }
+        ]
     }
 }
 ```
-Note the absence of `pubkeyB` above.
 
-If a wallet notices its transaction to be absent, it must send it again. It can either
-mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
-explicit error from the server).
-
-
-#### `err_sig`
-
-FIXME: should we crash instead of handling this (potentially adversarial) scenario ?
-
-Sent by a wallet to express its dreadful unhapiness with one of the returned signatures.
-It results in the server erasing all the signatures for this transaction and make other
-wallets send a new signature.
-
-This should not happen, but hey.
-
-```json
-{
-    "method": "err_sig",
-    "params": {
-        "id": "tx uid"
-    }
-}
-```
+The `vault_uid` is `sha256(vault txid)`.  
+The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
+to validate the signature.
 
 
 
@@ -386,8 +529,8 @@ This should not happen, but hey.
 
 ## Cosigning server
 
-A cosigning server is ran by each non-fund-manager participant. It is happy to sign any
-transaction input, but only once.
+A cosigning server is ran by each stakeholder. It is happy to sign any transaction input
+it can, but only once.
 
 ### Rough flow
 
