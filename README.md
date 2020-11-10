@@ -20,3 +20,4 @@ isn't decided yet.
 - [Revault description](revault.pdf)
 - [Messages](messages.md)
 - [Transaction](transactions.md)
+- [Ceremony](ceremony.md)
