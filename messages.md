@@ -236,8 +236,15 @@ lifetime of 2 weeks which we think is a good tradeoff between a smoother user ex
 (up to 2 weeks of gap between the first and last signatory for a vault) on one side, and
 operation cost *as well as reliance on it* on the other side.
 
-All transactions are signed paying a fixed 253perkw feerate.
-FIXME: see https://github.com/re-vault/practical-revault/issues/15
+All [revaulting transactions][revaulting_txs] (the cancel tx and both emergency tx) are signed
+paying a fixed `253 sat/kw` feerate and using the `ALL | ANYONECANPAY` signature hash flag.
+
+The [unvault transaction][unvault_tx] is signed using a fixed `84 000 sat/kw` feerate. This is
+a completely arbitrary value that was chosen to avoid blocking operations too early in case of
+a huge load of transactions on the network and an increase of the mempools minimum feerate.  
+This transaction's fees can be bumped if not competitive (using the CPFP output) but
+it will likely not be relayed if the mempools minimum feerate goes above `84 000 sat/kw`
+until the Bitcoin network deploys [package relay][package_relay].
 
 
 ### Rough flow
@@ -575,3 +582,10 @@ The server must:
     }
 }
 ```
+
+
+
+
+[revaulting_txs]: transactions.md#cancel_tx
+[unvault_tx]: transactions.md#unvault_tx
+[package_relay]: https://github.com/bitcoin/bitcoin/issues/14895
