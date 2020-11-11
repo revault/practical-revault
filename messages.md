@@ -25,6 +25,9 @@ watchtower to ACK or NACK it (cheaper and less onchain footprint than try-and-be
 For this matter we use the synchronisation server as a proxy between the managers and the
 watchtowers.
 
+A `secp256k1` key generated during the ceremony is used to sign the messages going to the
+managers across the synchronisation server.
+
 
 ### Rough flow
 
@@ -148,7 +151,8 @@ the wallet.
         "vault_id": "vault_uid",
         "accept": true,
         "reason": "",
-        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
+        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space, no \"pubkey\" entry and 'sig:\"\"'",
+        "pubkey": "secp256k1 public key used to produce the above signature"
     }
 }
 ```
@@ -206,7 +210,8 @@ circumstances (managers didn't try to cheat) have the same content semantic as w
         "vault_id": "vault_uid",
         "accept": true,
         "reason": "",
-        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
+        "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space, \"pubkey\" entry and 'sig:\"\"'",
+        "pubkey": "secp256k1 public key used to produce the above signature"
     }
 }
 ```
@@ -429,17 +434,20 @@ responded) array of the response of each watchtower.
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" entry and 'sig:\"\"'",
+                "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "pubkey": "secp256k1 public key used to produce the above signature"
             }
         ]
     }
@@ -500,17 +508,20 @@ responded) array of the response of each watchtower.
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" entry and 'sig:\"\"'",
+                "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space and 'sig:\"\"'"
+                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "pubkey": "secp256k1 public key used to produce the above signature"
             }
         ]
     }
