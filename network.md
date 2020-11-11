@@ -37,7 +37,7 @@ Stakeholder -> Sync Server (Noise_KX)
 
 Manager -> Cosigner (Noise_KX)
 
-Manager -> Sync Server (Noise_KX)  
+Manager -> Sync Server (Noise_KX)
 
 Watchtower -> Sync Server (Noise_KX)
 

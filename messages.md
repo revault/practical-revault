@@ -3,8 +3,8 @@
 A description of how information is exchanged between the different entities, as well as the
 flow of operations.
 
-These messages are exchanged on top of an encrypted and authenticated communication
-channel.
+These messages are exchanged on top of an [encrypted and authenticated communication
+channel](network.md).
 
 
 - [Watchtower](#watchtower)
