@@ -118,15 +118,12 @@ array of objects detailing a spending request.
         "requests": [
             {
                 "timestamp": 0000000,
-                "vault_id": "vault_uid",
                 "spend_tx": "unsigned spend tx (PSBT format)"
             }
         ]
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `spend_opinion`
@@ -145,15 +142,13 @@ the wallet.
 {
     "method": "spend_opinion",
     "params": {
-        "vault_id": "vault_uid",
+        "id": "spend transaction txid",
         "accept": true,
         "reason": "",
         "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `get_finalized_spends`
@@ -180,15 +175,12 @@ spending request.
     "result": {
         "requests": [
             {
-                "transaction": "fully signed spend transaction (PSBT format)",
-                "vault_id": "vault_uid"
+                "transaction": "fully signed spend transaction (PSBT format)"
             }
         ]
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `validate_spend`
@@ -203,15 +195,13 @@ circumstances (managers didn't try to cheat) have the same content semantic as w
 {
     "method": "spend_validation",
     "params": {
-        "vault_id": "vault_uid",
+        "id": "spend transaction txid",
         "accept": true,
         "reason": "",
         "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 
@@ -313,8 +303,6 @@ transaction.
 Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
 
-FIXME: Note that we use a cheap obfuscation for the funding txid but it's actually trivial
-to reconstruct the funding script with the below informations.
 
 ```json
 {
@@ -322,12 +310,10 @@ to reconstruct the funding script with the below informations.
     "params": {
         "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
         "signature": "Bitcoin ECDSA signature as hex",
-        "id": "tx uid"
+        "id": "transaction txid"
     }
 }
 ```
-
-The `tx uid` is `sha256(txid)`. It's used when polling.
 
 No explicit ACK from the server as the wallet can just `get_sigs` for its own signature.
 
@@ -341,7 +327,7 @@ FIXME: managers' wallets can currently get all signatures !!
 {
     "method": "get_sigs",
     "params": {
-        "id": "tx uid"
+        "id": "transaction txid"
     }
 }
 ```
@@ -380,7 +366,7 @@ This should not happen, but hey.
 {
     "method": "err_sig",
     "params": {
-        "id": "tx uid"
+        "id": "transaction txid"
     }
 }
 ```
@@ -397,13 +383,10 @@ We use a timestamp as watchtowers might accept the same spending attempt in the 
     "method": "request_spend",
     "params": {
         "timestamp": 0000000,
-        "vault_id": "vault_uid",
         "spend_tx": "unsigned spend tx (PSBT format)"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `get_spend_opinions`
@@ -415,12 +398,10 @@ attempt identified by `vault_id`.
 {
     "method": "get_spend_opinions",
     "params": {
-        "vault_id": "vault_uid"
+        "id": "spend transaction txid"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `spend_opinions`
@@ -431,7 +412,7 @@ responded) array of the response of each watchtower.
 ```json
 {
     "result": {
-        "vault_id": "vault_uid",
+        "id": "spend transaction txid",
         "opinions": [
             {
                 "accepted": true,
@@ -453,8 +434,7 @@ responded) array of the response of each watchtower.
 }
 ```
 
-The `vault_uid` is `sha256(vault txid)`.  
-The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
+The wallet needs to insert the `id` field in each opinion object in order to be able
 to validate the signature.
 
 
@@ -468,13 +448,10 @@ transaction to the watchtowers.
 {
     "method": "finalize_spend",
     "params": {
-        "transaction": "fully signed spend transaction (PSBT format)",
-        "vault_id": "vault_uid"
+        "transaction": "fully signed spend transaction (PSBT format)"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `get_spend_validations`
@@ -486,12 +463,10 @@ transaction spending the vault identified by `vault_id`.
 {
     "method": "get_spend_validations",
     "params": {
-        "vault_id": "vault_uid"
+        "id": "spend transaction txid"
     }
 }
 ```
-
-The `vault_uid` is `sha256(vault txid)`.
 
 
 #### `spend_validations`
@@ -502,7 +477,7 @@ responded) array of the response of each watchtower.
 ```json
 {
     "result": {
-        "vault_id": "vault_uid",
+        "id": "spend transaction txid",
         "opinions": [
             {
                 "accepted": true,
@@ -524,8 +499,7 @@ responded) array of the response of each watchtower.
 }
 ```
 
-The `vault_uid` is `sha256(vault txid)`.  
-The wallet needs to insert the `vault_uid` field in each opinion object in order to be able
+The wallet needs to insert the `id` field in each opinion object in order to be able
 to validate the signature.
 
 
