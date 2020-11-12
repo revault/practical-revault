@@ -118,7 +118,6 @@ array of objects detailing a spending request.
         "requests": [
             {
                 "timestamp": 0000000,
-                "vault_id": "deposit transaction txid",
                 "spend_tx": "unsigned spend tx (PSBT format)"
             }
         ]
@@ -143,7 +142,7 @@ the wallet.
 {
     "method": "spend_opinion",
     "params": {
-        "vault_id": "deposit transaction txid",
+        "id": "spend transaction txid",
         "accept": true,
         "reason": "",
         "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
@@ -176,8 +175,7 @@ spending request.
     "result": {
         "requests": [
             {
-                "transaction": "fully signed spend transaction (PSBT format)",
-                "vault_id": "deposit transaction txid"
+                "transaction": "fully signed spend transaction (PSBT format)"
             }
         ]
     }
@@ -197,7 +195,7 @@ circumstances (managers didn't try to cheat) have the same content semantic as w
 {
     "method": "spend_validation",
     "params": {
-        "vault_id": "deposit transaction txid",
+        "id": "spend transaction txid",
         "accept": true,
         "reason": "",
         "sig": "ECDSA (secp256k1) signature of this utf-8 encoded json with no space and 'sig:\"\"'"
@@ -385,7 +383,6 @@ We use a timestamp as watchtowers might accept the same spending attempt in the 
     "method": "request_spend",
     "params": {
         "timestamp": 0000000,
-        "vault_id": "deposit transaction txid",
         "spend_tx": "unsigned spend tx (PSBT format)"
     }
 }
@@ -401,7 +398,7 @@ attempt identified by `vault_id`.
 {
     "method": "get_spend_opinions",
     "params": {
-        "vault_id": "deposit transaction txid"
+        "id": "spend transaction txid"
     }
 }
 ```
@@ -415,7 +412,7 @@ responded) array of the response of each watchtower.
 ```json
 {
     "result": {
-        "vault_id": "deposit transaction txid",
+        "id": "spend transaction txid",
         "opinions": [
             {
                 "accepted": true,
@@ -437,7 +434,7 @@ responded) array of the response of each watchtower.
 }
 ```
 
-The wallet needs to insert the `vault_id` field in each opinion object in order to be able
+The wallet needs to insert the `id` field in each opinion object in order to be able
 to validate the signature.
 
 
@@ -451,8 +448,7 @@ transaction to the watchtowers.
 {
     "method": "finalize_spend",
     "params": {
-        "transaction": "fully signed spend transaction (PSBT format)",
-        "vault_id": "deposit transaction txid"
+        "transaction": "fully signed spend transaction (PSBT format)"
     }
 }
 ```
@@ -467,7 +463,7 @@ transaction spending the vault identified by `vault_id`.
 {
     "method": "get_spend_validations",
     "params": {
-        "vault_id": "deposit transaction txid"
+        "id": "spend transaction txid"
     }
 }
 ```
@@ -481,7 +477,7 @@ responded) array of the response of each watchtower.
 ```json
 {
     "result": {
-        "vault_id": "deposit transaction txid",
+        "id": "spend transaction txid",
         "opinions": [
             {
                 "accepted": true,
@@ -503,7 +499,7 @@ responded) array of the response of each watchtower.
 }
 ```
 
-The wallet needs to insert the `vault_id` field in each opinion object in order to be able
+The wallet needs to insert the `id` field in each opinion object in order to be able
 to validate the signature.
 
 
