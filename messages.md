@@ -11,8 +11,6 @@ channel](network.md).
 - [Cosigning server](#cosigning-server)
 - [Synchronisation server](#synchronisation-server)
 
-
-
 ## Watchtower
 
 At least one watchtower is ran by every stakeholder, and at most one wallet is paired with
@@ -568,6 +566,108 @@ The server must:
 }
 ```
 
+## Processes
+
+### Securing process
+
+```
+wallet          sync_server
+   +                +
+   | +----sig-----> |
+   |                |
+   | +--get_sigs--> |
+   |                +
+   |
+   |            watchtower
+   |                +
+   | +--sig emer--> |
+   | <--sig ack---+ |
+   +                +
+```
+
+| flow                  | request               |
+| --------------------- | --------------------- |
+| wallet -> sync_server | [sig](#sig-1)         |
+| wallet -> sync_server | [get_sigs](#get_sigs) |
+| wallet -> watchtower  | [sig](#sig)           |
+| watchtower -> wallet  | [sig_ack](#sig_ack)   |
+
+### Activation process
+
+```
+wallet          sync_server
+   +                +
+   | +----sig-----> |
+   |      ...       |
+   | +---sig------> |
+   |                |
+   | +--get_sigs--> |
+   |                |
+   | +--err_sig---> |
+   |                |
+   | +--get_sigs--> |
+   |                +
+   |
+   |                   watchtower
+   |                       +
+   | +--sig emer_unvault-> |
+   | <--------sig_ack----+ |
+   |                       |
+   | +--sig cancel-------> |
+   | <-------sig_ack-----+ |
+   +                       +
+```
+
+| flow                  | request               |
+| --------------------- | --------------------- |
+| wallet -> sync_server | [sig](#sig-1)         |
+| wallet -> sync_server | [get_sigs](#get_sigs) |
+| wallet -> sync_server | [err_sig](#err_sig)   |
+| wallet -> watchtower  | [sig](#sig)           |
+| watchtower -> wallet  | [sig_ack](#sig_ack)   |
+
+### Spending process
+
+```
+wallet                     sync_server              watchtower
+   +                           +                         +
+   |                           |                         |
+   | +-request_spend---------> |                         |
+   |                           | <--get_spend_requests-+ |
+   |                           | <---spend_opinion-----+ |
+   | +-get_spend_opinions----> |                         |
+   | <-spend_opinions--------+ |                         |
+   |                           +                         +
+   |
+   |            cosig_server
+   |                 +
+   |                 |
+   | +----sign-----> |
+   | <-sign result-+ |
+   |                 +
+   |
+   |                       sync_server              watchtower
+   |                           +                         +
+   |                           |                         |
+   | +-finalize_spend--------> |                         |
+   |                           | <-get_finalized_spends+ |
+   |                           | <-validate_spend------+ |
+   | +-get_spend_validations-> |                         |
+   | <---spend_validations---+ |                         |
+   +                           +                         +
+```
+
+| flow                      | request                                         |
+| ------------------------  | ----------------------------------------------- |
+| wallet -> sync_server     | [request_spend](#request_spend)                 |
+| wallet -> sync_server     | [get_spend_opinions](#get_spend_opinions)       |
+| wallet -> sync_server     | [finalize_spend](#finalize_spend)               |
+| wallet -> sync_server     | [get_spend_validations](#get_spend_validations) |
+| wallet -> cosig_server    | [sign](#sign)                                   |
+| watchtower -> sync_server | [get_spend_requests](#get_spend_requests)       |
+| watchtower -> sync_server | [spend_opinion](#spend_opinion)                 |
+| watchtower -> sync_server | [get_finalized_spends](#get_finalized_spends)   |
+| watchtower -> sync_server | [validate_spend](#validate_spend)               |
 
 
 
