@@ -634,48 +634,25 @@ The server must:
 
 ## Processes
 
-### Securing process
+### Presigning process  
+
+#### Revocation transactions signing step
 
 ```
-wallet          sync_server
-   +                +
-   | +----sig-----> |
-   |                |
-   | +--get_sigs--> |
-   |                +
-   |
-   |            watchtower
-   |                +
-   | +--sig emer--> |
-   | <--sig ack---+ |
-   +                +
-```
-
-| flow                  | request               |
-| --------------------- | --------------------- |
-| wallet -> sync_server | [sig](#sig-1)         |
-| wallet -> sync_server | [get_sigs](#get_sigs) |
-| wallet -> watchtower  | [sig](#sig)           |
-| watchtower -> wallet  | [sig_ack](#sig_ack)   |
-
-### Activation process
-
-```
-wallet          sync_server
-   +                +
-   | +----sig-----> |
-   |      ...       |
-   | +---sig------> |
-   |                |
-   | +--get_sigs--> |
-   |                |
-   | +--err_sig---> |
-   |                |
-   | +--get_sigs--> |
-   |                +
+stakeholder           sync_server
+   +                      +
+   | +-sig emer---------> |
+   | +-sig emer_unvault-> |
+   | +-sig cancel-------> |
+   |                      |
+   | +--get_sigs--------> |
+   |                      +
    |
    |                   watchtower
    |                       +
+   | +--sig emer---------> |
+   | <--------sig_ack----+ |
+   |                       |
    | +--sig emer_unvault-> |
    | <--------sig_ack----+ |
    |                       |
@@ -684,18 +661,38 @@ wallet          sync_server
    +                       +
 ```
 
-| flow                  | request               |
-| --------------------- | --------------------- |
-| wallet -> sync_server | [sig](#sig-1)         |
-| wallet -> sync_server | [get_sigs](#get_sigs) |
-| wallet -> sync_server | [err_sig](#err_sig)   |
-| wallet -> watchtower  | [sig](#sig)           |
-| watchtower -> wallet  | [sig_ack](#sig_ack)   |
+| flow                       | request               |
+| -------------------------- | --------------------- |
+| stakeholder -> sync_server | [sig](#sig-1)         |
+| stakeholder -> sync_server | [get_sigs](#get_sigs) |
+| stakeholder -> watchtower  | [sig](#sig)           |
+| watchtower -> stakeholder  | [sig_ack](#sig_ack)   |
+
+#### Activation signing step
+
+```
+stakeholder      sync_server
+   +                 +
+   | +-sig unvault-> |
+   |                 |
+   | +--get_sigs---> |
+   +                 |
+                     | 
+manager              |
+   +                 |
+   | +---get_sigs--> |
+   +                 +
+```
+
+| flow                       | request               |
+| -------------------------- | --------------------- |
+| stakeholder -> sync_server | [sig](#sig-1)         |
+| stakeholder -> sync_server | [get_sigs](#get_sigs) |
 
 ### Spending process
 
 ```
-wallet                     sync_server              watchtower
+manager                    sync_server              watchtower
    +                           +                         +
    |                           |                         |
    | +-request_spend---------> |                         |
@@ -724,12 +721,12 @@ wallet                     sync_server              watchtower
 ```
 
 | flow                      | request                                         |
-| ------------------------  | ----------------------------------------------- |
-| wallet -> sync_server     | [request_spend](#request_spend)                 |
-| wallet -> sync_server     | [get_spend_opinions](#get_spend_opinions)       |
-| wallet -> sync_server     | [finalize_spend](#finalize_spend)               |
-| wallet -> sync_server     | [get_spend_validations](#get_spend_validations) |
-| wallet -> cosig_server    | [sign](#sign)                                   |
+| ------------------------- | ----------------------------------------------- |
+| manager -> sync_server    | [request_spend](#request_spend)                 |
+| manager -> sync_server    | [get_spend_opinions](#get_spend_opinions)       |
+| manager -> sync_server    | [finalize_spend](#finalize_spend)               |
+| manager -> sync_server    | [get_spend_validations](#get_spend_validations) |
+| manager -> cosig_server   | [sign](#sign)                                   |
 | watchtower -> sync_server | [get_spend_requests](#get_spend_requests)       |
 | watchtower -> sync_server | [spend_opinion](#spend_opinion)                 |
 | watchtower -> sync_server | [get_finalized_spends](#get_finalized_spends)   |
