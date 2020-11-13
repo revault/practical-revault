@@ -118,7 +118,6 @@ array of objects detailing a spending request.
     "result": {
         "requests": [
             {
-                "timestamp": 0000000,
                 "spend_tx": "unsigned spend tx (PSBT format)"
             }
         ]
@@ -253,17 +252,6 @@ until the Bitcoin network deploys [package relay][package_relay].
     ||   -A-- get_sigs  ---->    ||
             ...(polling)
     ||   -B-- get_sigs  ---->    ||
-            ...(polling)
-    ||   -A-- err_sig   ---->    ||   // A: Huh lol. This sig isn't valid.
-    ||   <-- get_sigs error--    ||   // Server: Someone's is unhappy with the sig so I erased all of them, try again.
-    ||
-    ||   -A-- sig  --------->    ||
-    ||   -B-- sig  --------->    ||
-    ||   -C-- sig  --------->    ||
-    ||
-    ||   -A-- get_sigs  ---->    ||
-    ||   -B-- get_sigs  ---->    ||
-    ||   -C-- get_sigs  ---->    ||
             ...(polling)
             ...(polling)              // Eventually they all retrieve the sigs.
 ```
@@ -421,37 +409,14 @@ mean the server didn't store it (no explicit ACK) or someone was unhappy with it
 explicit error from the server).
 
 
-#### `err_sig`
-
-FIXME: should we crash instead of handling this (potentially adversarial) scenario ?
-
-Sent by a wallet to express its dreadful unhapiness with one of the returned signatures.
-It results in the server erasing all the signatures for this transaction and make other
-wallets send a new signature.
-
-This should not happen, but hey.
-
-```json
-{
-    "method": "err_sig",
-    "params": {
-        "id": "transaction txid"
-    }
-}
-```
-
-
 #### `request_spend`
 
 Sent by a manager to signal their willingness to spend a vault.
-
-We use a timestamp as watchtowers might accept the same spending attempt in the future.
 
 ```json
 {
     "method": "request_spend",
     "params": {
-        "timestamp": 0000000,
         "spend_tx": "unsigned spend tx (PSBT format)"
     }
 }
@@ -486,19 +451,19 @@ responded) array of the response of each watchtower.
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" entry and 'sig:\"\"'",
+                "sig": "ECDSA (secp256k1) signature as specified in the `spend_opinion` message",
                 "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "sig": "ECDSA (secp256k1) signature as specified in the `spend_opinion` message",
                 "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "sig": "ECDSA (secp256k1) signature as specified in the `spend_opinion` message",
                 "pubkey": "secp256k1 public key used to produce the above signature"
             }
         ]
