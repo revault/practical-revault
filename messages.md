@@ -253,17 +253,6 @@ until the Bitcoin network deploys [package relay][package_relay].
             ...(polling)
     ||   -B-- get_sigs  ---->    ||
             ...(polling)
-    ||   -A-- err_sig   ---->    ||   // A: Huh lol. This sig isn't valid.
-    ||   <-- get_sigs error--    ||   // Server: Someone's is unhappy with the sig so I erased all of them, try again.
-    ||
-    ||   -A-- sig  --------->    ||
-    ||   -B-- sig  --------->    ||
-    ||   -C-- sig  --------->    ||
-    ||
-    ||   -A-- get_sigs  ---->    ||
-    ||   -B-- get_sigs  ---->    ||
-    ||   -C-- get_sigs  ---->    ||
-            ...(polling)
             ...(polling)              // Eventually they all retrieve the sigs.
 ```
 
@@ -418,26 +407,6 @@ Note the absence of `pubkeyB` in the above samples.
 If a wallet notices its transaction to be absent, it must send it again. It can either
 mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
 explicit error from the server).
-
-
-#### `err_sig`
-
-FIXME: should we crash instead of handling this (potentially adversarial) scenario ?
-
-Sent by a wallet to express its dreadful unhapiness with one of the returned signatures.
-It results in the server erasing all the signatures for this transaction and make other
-wallets send a new signature.
-
-This should not happen, but hey.
-
-```json
-{
-    "method": "err_sig",
-    "params": {
-        "id": "transaction txid"
-    }
-}
-```
 
 
 #### `request_spend`
