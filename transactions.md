@@ -7,9 +7,10 @@ describe outputs spending policies.
 
 We denote `N` the number of stakeholders, `M` the number of fund managers (allowed
 to unlock the unvault transaction output along with the cosigning servers after a timeout),
-and `X` the CSV value in the unvault transaction.
+and `X` the CSV value in the unvault transaction. Each transaction type here signals 
+replace-by-fee (RBF).
 
-- [vault_tx](#vault_tx)
+- [deposit_tx](#deposit_tx)
 - [unvault_tx](#unvault_tx)
 - [spend_tx](#spend_tx)
 - [cancel_tx](#cancel_tx)
@@ -18,9 +19,9 @@ and `X` the CSV value in the unvault transaction.
     - [unvault_emergency_tx](#unvault_emergency_tx)
 
 
-## vault_tx
+## deposit_tx
 
-The deposit transaction.
+The transaction which deposits into the vault.
 
 #### IN
 
@@ -37,7 +38,7 @@ vault_witness_script = thresh(N, pubkey1, pubkey2, ..., pubkeyN)
 
 ## unvault_tx
 
-The transaction which spends the [`vault_tx`](vault_tx) deposit output, and creates an
+The transaction which spends the [`deposit_tx`](deposit_tx) deposit output, and creates an
 unvault output spendable by the `N` stakeholders or the managers (along with the cosigning
 servers) after `X` blocks.
 
@@ -48,7 +49,7 @@ servers) after `X` blocks.
 
 - count: 1
 - inputs[0]:
-    - txid: `<vault_tx txid>`
+    - txid: `<deposit_tx txid>`
     - vout: N/A
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
@@ -58,7 +59,7 @@ servers) after `X` blocks.
 
 - count: 2
 - outputs[0]:
-    - value: `<vault_tx output value - tx_fee - 330>`
+    - value: `<deposit_tx output value - tx_fee - 330>`
     - scriptPubkey: `unvault_descriptor`
 
 - outputs[1]:
@@ -78,7 +79,7 @@ unvault_cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM) # The pu
 
 ## spend_tx
 
-The transaction which spends the unvaulting transaction by the [`M` + cosigners]
+The transaction which spends the [`unvault_tx`](unvault_tx) `output[0]` by the [`M` + cosigners]
 path, only spendable after `X` blocks.
 
 - version: 2
@@ -103,8 +104,8 @@ path, only spendable after `X` blocks.
 
 ## cancel_tx
 
-This transaction spends the `unvault_tx` using the N-of-N path and pays back to a
-vault txout (it is therefore another deposit transaction).
+The transaction which spends the [`unvault_tx`](unvault_tx) `output[0]` using the N-of-N path and 
+pays back to a vault txout (it is therefore another vault deposit transaction).
 
 - version: 2
 - locktime: 0
@@ -129,15 +130,15 @@ vault txout (it is therefore another deposit transaction).
 
 ## emergency_txs
 
-Emergency transactions are used as deterrents against threat. They lock coins to what we
-call an EDV (Emergency Deep Vault): a script chosen by the participants and kept
-obfuscated by the properties of P2WSH, as the emergency transactions are never meant
-to be used.
+Emergency transactions are used as deterrents against threats targetting stakeholders' 
+funds. They lock coins to what we call an EDV (Emergency Deep Vault): a script chosen 
+by the participants and kept obfuscated by the properties of P2WSH, as the emergency 
+transactions are never meant to be used.
 
 
 ### vault_emergency_tx
 
-This transaction spends the `vault_tx` to the EDV by the `N`-of-`N` path.
+The transaction which spends the [`vault_tx`](vault_tx) output to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
@@ -146,7 +147,7 @@ This transaction spends the `vault_tx` to the EDV by the `N`-of-`N` path.
 
 - count: 1
 - inputs[0]:
-    - txid: `<vault_tx txid>`
+    - txid: `<deposit_tx txid>`
     - vout: N/A
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
@@ -162,7 +163,7 @@ This transaction spends the `vault_tx` to the EDV by the `N`-of-`N` path.
 
 ### unvault_emergency_tx
 
-This transaction spends the `unvault_tx` to the EDV by the `N`-of-`N` path.
+This transaction spends the [`unvault_tx`](unvault_tx) `output[0]` to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
