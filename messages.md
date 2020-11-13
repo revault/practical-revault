@@ -118,7 +118,6 @@ array of objects detailing a spending request.
     "result": {
         "requests": [
             {
-                "timestamp": 0000000,
                 "spend_tx": "unsigned spend tx (PSBT format)"
             }
         ]
@@ -445,13 +444,10 @@ This should not happen, but hey.
 
 Sent by a manager to signal their willingness to spend a vault.
 
-We use a timestamp as watchtowers might accept the same spending attempt in the future.
-
 ```json
 {
     "method": "request_spend",
     "params": {
-        "timestamp": 0000000,
         "spend_tx": "unsigned spend tx (PSBT format)"
     }
 }
