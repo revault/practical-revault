@@ -169,7 +169,7 @@ a `spend_request` to learn about finalized spending attempts.
 #### `finalized_spends`
 
 The response to a `get_final_spend_requests`. Returns an arbitrarily-sized (can be 0)
-array of objects detailing a finalized (ie with a fully-signed spend transaction)
+array of objects detailing a finalized (i.e. with a fully-signed spend transaction)
 spending request.
 
 ```json
@@ -191,7 +191,7 @@ Sent by a watchtower to the synchronisation server to signal its acknowledgement
 or refusal of a fully-signed spend transaction.
 
 It has the same entries as the `spend_opinion` message, and should under normal
-circumstances (managers didn't try to cheat) have the same content semantic as well.
+circumstances (if managers didn't try to cheat) have the same content semantic as well.
 
 ```json
 {
@@ -229,7 +229,7 @@ lifetime of 2 weeks which we think is a good tradeoff between a smoother user ex
 (up to 2 weeks of gap between the first and last signatory for a vault) on one side, and
 operation cost *as well as reliance on it* on the other side.
 
-All [revaulting transactions][revaulting_txs] (the cancel tx and both emergency tx) are signed
+All [revaulting transactions][revaulting_txs] (the cancel tx and both emergency txs) are signed
 paying a fixed `253 sat/kw` feerate and using the `ALL | ANYONECANPAY` signature hash flag.
 
 The [unvault transaction][unvault_tx] is signed using a fixed `84 000 sat/kw` feerate. This is
@@ -288,7 +288,7 @@ until the Bitcoin network deploys [package relay][package_relay].
 #### `sig`
 
 Sent by a stakeholder wallet at any point in time to share the signature for a transaction
-with all participants.
+with all other stakeholders and all managers (in the case of unvault and cancel transactions).
 
 The wallet can safely post its signature for the `cancel` and `emergency`s of each
 `vault` without waiting for others. However, it must wait for everyone to have signed
@@ -461,7 +461,7 @@ We use a timestamp as watchtowers might accept the same spending attempt in the 
 #### `get_spend_opinions`
 
 Sent by a manager when polling for watchtowers agreement regarding the spend
-attempt identified by `vault_id`.
+attempt identified by `id`.
 
 ```json
 {
@@ -529,7 +529,7 @@ transaction to the watchtowers.
 #### `get_spend_validations`
 
 Sent by a manager when polling for watchtowers acknowledgement of the fully signed
-transaction spending the vault identified by `vault_id`.
+transaction spending the vault identified by `id`.
 
 ```json
 {
