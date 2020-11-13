@@ -293,9 +293,13 @@ Sent by a stakeholder wallet at any point in time to share the signature for a t
 with all participants.
 
 The wallet can safely post its signature for the `cancel` and `emergency`s of each
-`vault` utxo without waiting for others. However, it must wait for everyone to have signed
+`vault` without waiting for others. However, it must wait for everyone to have signed
 the `cancel` and `emergency` transactions and its watchtower to have verified and stored
 the signature before possibly sharing its signature for the unvault transaction.
+
+The signature for the emergency transaction is encrypted using the static public key of
+each of the other stakeholders. (FIXME: link to the ceremony)  
+We currently use `X25519-XSalsa20-Poly1305` for the encryption of the signature.
 
 A wallet is not bound to share its signature for the unvault transaction. This flexibility
 allows "unactive vaults": a multisig which is not spendable by default but still guarded
@@ -308,7 +312,15 @@ transaction.
 Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
 
+If the signature is for:
+  - An emergency transaction:
+    - The `signature` field must not be set.
+    - The `encrypted_signature` signature object must be filled.
+  - Any other transaction:
+    - The `signature` string must be set.
+    - The `encrypted_signature` field must not be set.
 
+For an usual transaction:
 ```json
 {
     "method": "sig",
@@ -319,6 +331,21 @@ flag.
     }
 }
 ```
+For an emergency transaction:
+```json
+{
+    "method": "sig",
+    "params": {
+        "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
+        "encrypted_signature": {
+          "pubkey": "Curve25519 public key used to encrypt the signature",
+          "signature": "base64-encoded encrypted Bitcoin ECDSA signature"
+        },
+        "id": "transaction txid"
+    }
+}
+```
+
 
 No explicit ACK from the server as the wallet can just `get_sigs` for its own signature.
 
@@ -337,20 +364,59 @@ FIXME: managers' wallets can currently get all signatures !!
 }
 ```
 
-The server answers with a (possibly incomplete) mapping of each pubkey to each signature
-required for this transaction.
+The server answers with a (possibly incomplete) mapping of each `secp256k1` Bitcoin pubkey
+to an object containing the (maybe encrypted) signature required for this transaction to
+be valid.  
+If the requested transaction is:
+  - An emergency transaction:
+    - The `signature` field must not be set.
+    - The `encrypted_signature` signature object must be set.
+  - Any other transaction:
+    - The `signature` field must be set.
+    - The `encrypted_signature` field must not be set.
 
+
+For an "usual" transaction
 ```json
 {
     "result": {
         "signatures": {
-            "pukeyA": "sig",
-            "pubkeyC": "sig"
+            "pubkeyA": {
+                "signature": "Bitcoin ECDSA signature"
+            },
+            "pubkeyC": {
+                "signature": "Bitcoin ECDSA signature"
+            }
         }
     }
 }
 ```
-Note the absence of `pubkeyB` above.
+Or for an emergency transaction
+```json
+{
+    "result": {
+        "signatures": {
+            "pubkeyA": {
+                "encrypted_signature": {
+                    "Curve25519_pubkey-1": "encrypted Bitcoin ECDSA signature",
+                    "Curve25519_pubkey-2": "encrypted Bitcoin ECDSA signature",
+                    "Curve25519_pubkey-N": "encrypted Bitcoin ECDSA signature"
+                }
+            },
+            "pubkeyC": {
+                "encrypted_signature": {
+                    "Curve25519_pubkey-1": "encrypted Bitcoin ECDSA signature",
+                    "Curve25519_pubkey-2": "encrypted Bitcoin ECDSA signature",
+                    "Curve25519_pubkey-N": "encrypted Bitcoin ECDSA signature"
+                }
+            }
+        }
+    }
+}
+```
+With `N` the number of stakeholders.
+
+Note the absence of `pubkeyB` in the above samples.
 
 If a wallet notices its transaction to be absent, it must send it again. It can either
 mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
