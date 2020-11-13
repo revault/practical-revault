@@ -1,18 +1,13 @@
 # Practical revault
 
-A protocol sketch for communication between the different entities in the [Revault
-architecture](revault.pdf).
+A specification for the initialization and operation of the [Revault](revault.pdf) custody protocol.
 
 
 This repo is for us to bikeshed on the actual and practical architecture before
-moving forward with the implementation.  
-Anyone is welcome for bikeshedding with us, to raise issues for either asking questions
-about, or pointing out actual issues with the "protocol".
+moving forward with the implementation.
 
-
-JSON is used to straightforwardly describe messages here but the actual encoding
-isn't decided yet.
-
+Anyone is welcome to contribute by raising issues for either asking questions
+about, or pointing out actual issues with the protocol.
 
 
 ## Table of contents
@@ -21,3 +16,5 @@ isn't decided yet.
 - [Messages](messages.md)
 - [Transaction](transactions.md)
 - [Network](network.md)
+
+> TODO: ceremony.md and setup.md
