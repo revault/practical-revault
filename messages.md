@@ -451,19 +451,19 @@ responded) array of the response of each watchtower.
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" entry and 'sig:\"\"'",
+                "sig": "ECDSA (secp256k1) signature as specified in the `spend_opinion` message",
                 "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "sig": "ECDSA (secp256k1) signature as specified in the `spend_opinion` message",
                 "pubkey": "secp256k1 public key used to produce the above signature"
             },
             {
                 "accepted": true,
                 "reason": "",
-                "sig": "ECDSA (secp256k1) signature of this exact json with no space, no \"pubkey\" and 'sig:\"\"'",
+                "sig": "ECDSA (secp256k1) signature as specified in the `spend_opinion` message",
                 "pubkey": "secp256k1 public key used to produce the above signature"
             }
         ]
