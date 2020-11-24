@@ -64,7 +64,7 @@ servers) after `X` blocks.
 
 - outputs[1]:
     - value: `330`
-    - scriptPubkey: `unvault_cpfp_descriptor`
+    - scriptPubkey: `cpfp_descriptor`
 
 With:
 ```
@@ -73,8 +73,8 @@ unvault_witness_script = or(1@thresh(len(stakeholders), stakeholders), 9@and(thr
 ```
 
 ```
-unvault_cpfp_descriptor = wsh(unvault_cpfp_witness_script)
-unvault_cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM) # The pubkeys being the managers'
+cpfp_descriptor = wsh(cpfp_witness_script)
+cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM) # The pubkeys being the managers'
 ```
 
 ## spend_tx
@@ -98,8 +98,11 @@ path, only spendable after `X` blocks.
 
 - count: 1
 - outputs[0]:
-    - value: `<unvault_tx outputs[0] value - tx_fee>`
+    - value: `<unvault_tx outputs[0] value - tx_fee - 330>`
     - scriptPubkey: N/A
+- outputs[1]:
+    - value: `330sats`
+    - scriptPubkey: `cpfp_descriptor`
 
 
 ## cancel_tx
