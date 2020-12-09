@@ -229,7 +229,8 @@ lifetime of 2 weeks which we think is a good tradeoff between a smoother user ex
 operation cost *as well as reliance on it* on the other side.
 
 All [revaulting transactions][revaulting_txs] (the cancel tx and both emergency txs) are signed
-paying a fixed `253 sat/kw` feerate and using the `ALL | ANYONECANPAY` signature hash flag.
+paying a fixed `21250 sat/kw` feerate and using the `ALL | ANYONECANPAY` signature hash flag. This
+is in order to reduce the funds burden on *each* of the watchtowers.
 
 The [unvault transaction][unvault_tx] is signed using a fixed `5250 sat/kw` feerate. This is
 a completely arbitrary value that was chosen to avoid blocking operations too early in case of
