@@ -63,7 +63,7 @@ servers) after `X` blocks.
     - scriptPubkey: `unvault_descriptor`
 
 - outputs[1]:
-    - value: `330`
+    - value: `30000`
     - scriptPubkey: `cpfp_descriptor`
 
 With:
@@ -79,8 +79,9 @@ cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM) # The pubkeys be
 
 ## spend_tx
 
-The transaction which spends the [`unvault_tx`](unvault_tx) `output[0]` by the [`M` + cosigners]
+The transaction which spends one or many [`unvault_tx`](unvault_tx) `output[0]` by the [`M` + cosigners]
 path, only spendable after `X` blocks.
+The CPFP output value is adjusted depending on the actual transaction size.
 
 - version: 2
 - locktime: 0
@@ -98,11 +99,14 @@ path, only spendable after `X` blocks.
 
 - count: 1
 - outputs[0]:
-    - value: `<unvault_tx outputs[0] value - tx_fee - 330>`
-    - scriptPubkey: N/A
-- outputs[1]:
-    - value: `330sats`
+    - value: `2 * 32 * tx_size_vbytes`
     - scriptPubkey: `cpfp_descriptor`
+- outputs[1]:
+    - value: N/A (may be many of them)
+    - scriptPubkey: N/A
+- outputs[N]:
+    - value: N/A (may be many of them)
+    - scriptPubkey: N/A
 
 
 ## cancel_tx
