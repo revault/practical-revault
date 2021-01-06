@@ -50,7 +50,7 @@ servers) after `X` blocks.
 - count: 1
 - inputs[0]:
     - txid: `<deposit_tx txid>`
-    - vout: N/A
+    - vout: `<deposit_tx vout>`
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
     - witness: `satisfy(vault_descriptor)`
@@ -155,7 +155,7 @@ The transaction which spends the [`vault_tx`](vault_tx) output to the EDV by the
 - count: 1
 - inputs[0]:
     - txid: `<deposit_tx txid>`
-    - vout: N/A
+    - vout: `<deposit_tx vout>`
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
     - witness: `satisfy(vault_descriptor)`

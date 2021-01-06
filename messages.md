@@ -74,7 +74,7 @@ participants.
             ...
         },
         "txid": "txid",
-        "vault_txid": "vault transaction txid"
+        "deposit_outpoint": "deposit utxo outpoint"
     }
 }
 ```
@@ -340,7 +340,6 @@ No explicit ACK from the server as the wallet can just `get_sigs` for its own si
 #### `get_sigs`
 
 Sent by a wallet to retrieve all signatures for a specific transaction.
-FIXME: managers' wallets can currently get all signatures !!
 
 ```json
 {
@@ -562,7 +561,7 @@ it can, but only once.
     ||   <-- sign result ----    ||   // Server: *signs* .. Here you go.
     ||
     ||   -B-- sign  -------->    ||   // B: I need you to sign this same transaction input
-    ||   <-- sign result ----    ||   // Server: I already signed an input spending this txid, here is the existing signature
+    ||   <-- sign result ----    ||   // Server: I already signed an input spending this outpoint, here is the existing signature
 ```
 
 ### Messages format
