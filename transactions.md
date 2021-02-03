@@ -17,6 +17,7 @@ replace-by-fee (RBF).
 - [emergency_txs](#emergency_txs)
     - [vault_emergency_tx](#vault_emergency_tx)
     - [unvault_emergency_tx](#unvault_emergency_tx)
+- [bypass_tx](#bypass_tx)
 
 
 ## deposit_tx
@@ -104,7 +105,7 @@ The CPFP output value is adjusted depending on the actual transaction size.
 - outputs[1]:
     - value: N/A (may be many of them)
     - scriptPubkey: N/A
-- outputs[N]:
+- outputs[n]:
     - value: N/A (may be many of them)
     - scriptPubkey: N/A
 
@@ -112,7 +113,7 @@ The CPFP output value is adjusted depending on the actual transaction size.
 ## cancel_tx
 
 The transaction which spends the [`unvault_tx`](unvault_tx) `output[0]` using the N-of-N path and 
-pays back to a vault txout (it is therefore another vault deposit transaction).
+pays back to a deposit output (it is therefore another vault deposit transaction).
 
 - version: 2
 - locktime: 0
@@ -145,7 +146,7 @@ transactions are never meant to be used.
 
 ### vault_emergency_tx
 
-The transaction which spends the [`vault_tx`](vault_tx) output to the EDV by the `N`-of-`N` path.
+The transaction which spends the [`deposit_tx`](deposit_tx) output to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
@@ -191,3 +192,27 @@ This transaction spends the [`unvault_tx`](unvault_tx) `output[0]` to the EDV by
 - outputs[0]:
     - value: `<unvault_tx outputs[0] value - fees>`
     - scriptPubkey: `0x00 SHA256(<EDV_script>)`
+
+
+## bypass_tx
+
+Bypass txs are used in the case where stakeholders need immediate access to funds. Bypass 
+txs avoid the controls on expenses set by stakeholders and enforced by watchtowers. A 
+Bypass tx spends the [`deposit_tx`](deposit_tx) and pays to arbitrary addresses.
+
+- version: 2
+- locktime: 0
+
+#### IN
+
+- count: 1
+- inputs[0]:
+    - txid: `<deposit_tx txid>`
+    - vout: `<deposit_tx vout>`
+    - sequence: `0xfffffffd`
+    - scriptSig: `<empty>`
+    - witness: `satisfy(vault_descriptor)`
+
+#### OUT
+
+Unspecified
