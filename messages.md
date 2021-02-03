@@ -39,13 +39,6 @@ transaction.
     ||  <--- sig_ack  ---------      ||
 ```
 
-```
-  WATCHTOWER                      COORDINATOR
-    ||   -- get_spend_tx  ------->   ||  // Is there any available spend tx for this vault ?
-    ||  <--- spend_tx   ----------   ||  // Here is what i know about. I may be lying but worst case you revault.
-```
-
-
 ### Messages format
 
 #### `sig`
@@ -84,35 +77,6 @@ the transaction, *or if it is unable to bump its feerate with its currently-avai
     }
 }
 ```
-
-
-#### `get_spend_tx`
-
-Sent by a watchtower to the coordinator after an unvault event to learn
-about the spend transaction.
-
-```json
-{
-    "method": "get_spend_tx",
-    "params": {
-        "deposit_outpoint": "txid:vout"
-    }
-}
-```
-
-
-#### `spend_tx`
-
-The response to a `get_spend_tx`.
-
-```json
-{
-    "result": {
-        "spend_tx": "hex of Bitcoin-serialized spend tx"
-    }
-}
-```
-
 
 
 ------
@@ -167,6 +131,13 @@ until the Bitcoin network deploys [package relay][package_relay].
                                             fully signed spend transaction so watchtowers
                                             don't freak out.
 ```
+
+```
+  WATCHTOWER                      COORDINATOR
+    ||   -- get_spend_tx  ------->   ||  // Is there any available spend tx for this vault ?
+    ||  <--- spend_tx   ----------   ||  // Here is what i know about. I may be lying but worst case you revault.
+```
+
 
 ### Messages format
 
@@ -316,6 +287,34 @@ specific unvault.
     "params": {
         "deposit_outpoint": "txid:vout",
         "spend_tx": "hex of Bitcoin-serialized fully-signed spend transaction"
+    }
+}
+```
+
+
+#### `get_spend_tx`
+
+Sent by a watchtower to the coordinator after an unvault event to learn
+about the spend transaction.
+
+```json
+{
+    "method": "get_spend_tx",
+    "params": {
+        "deposit_outpoint": "txid:vout"
+    }
+}
+```
+
+
+#### `spend_tx`
+
+The response to a `get_spend_tx`.
+
+```json
+{
+    "result": {
+        "spend_tx": "hex of Bitcoin-serialized spend tx"
     }
 }
 ```
