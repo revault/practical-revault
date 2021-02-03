@@ -372,6 +372,8 @@ manager              |
 ### Spending process
 
 ```
+     ... Gather sufficient managers signatures ...
+
 manager         cosig_server
    |                 +
    |                 |
@@ -384,7 +386,7 @@ manager         cosig_server
    |                           |
    | +-set_spend_tx ---------> |
    |                           |
-   |                           +
+   +                           +
 
       ... Broadcast the unvault tx ...
 
