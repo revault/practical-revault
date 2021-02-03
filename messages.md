@@ -82,6 +82,58 @@ the transaction, *or if it is unable to bump its feerate with its currently-avai
 ------
 
 
+## Cosigning server
+
+A cosigning server is ran by each stakeholder. It is happy to sign any transaction input
+it can, but only once.
+
+### Rough flow
+
+```
+  WALLET                      COSIG_SERVER
+    ||   -A-- sign  -------->    ||   // A: I need you to sign this transaction input
+    ||   <-- sign result ----    ||   // Server: *signs* .. Here you go.
+    ||
+    ||   -B-- sign  -------->    ||   // B: I need you to sign this same transaction input
+    ||   <-- sign result ----    ||   // Server: I already signed an input spending this outpoint, here is the existing signature
+```
+
+### Messages format
+
+#### `sign`
+
+Sent at any point in time by a manager who'll soon attempt to unvault and spend one or
+more vault(s).
+
+As the spend transaction must only spend unvault transaction outputs, the cosigning server
+shall sign all inputs (if all of them were not already signed).
+
+```json
+{
+    "method": "sign",
+    "params": {
+        "tx": "psbt"
+    }
+}
+```
+
+The server must:
+  - if any input was already signed
+    - return the empty string `""`
+  - else
+    - return the PSBT with its signature appended for all inputs
+
+```json
+{
+    "result": {
+        "tx": "psbt"
+    }
+}
+```
+
+
+------
+
 
 ## Coordinator
 
@@ -259,60 +311,6 @@ The response to a `get_spend_tx`.
 }
 ```
 
-
-
-------
-
-
-
-## Cosigning server
-
-A cosigning server is ran by each stakeholder. It is happy to sign any transaction input
-it can, but only once.
-
-### Rough flow
-
-```
-  WALLET                      COSIG_SERVER
-    ||   -A-- sign  -------->    ||   // A: I need you to sign this transaction input
-    ||   <-- sign result ----    ||   // Server: *signs* .. Here you go.
-    ||
-    ||   -B-- sign  -------->    ||   // B: I need you to sign this same transaction input
-    ||   <-- sign result ----    ||   // Server: I already signed an input spending this outpoint, here is the existing signature
-```
-
-### Messages format
-
-#### `sign`
-
-Sent at any point in time by a manager who'll soon attempt to unvault and spend one or
-more vault(s).
-
-As the spend transaction must only spend unvault transaction outputs, the cosigning server
-shall sign all inputs (if all of them were not already signed).
-
-```json
-{
-    "method": "sign",
-    "params": {
-        "tx": "psbt"
-    }
-}
-```
-
-The server must:
-  - if any input was already signed
-    - return the empty string `""`
-  - else
-    - return the PSBT with its signature appended for all inputs
-
-```json
-{
-    "result": {
-        "tx": "psbt"
-    }
-}
-```
 
 ## Processes
 
