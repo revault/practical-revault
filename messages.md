@@ -111,7 +111,7 @@ until the Bitcoin network deploys [package relay][package_relay].
 
 ```
  STAKEHOLDER's WALLET          COORDINATOR
-    ||   -A-- sig   -------->    ||   // A: Here is a sig for this id !
+    ||   -A-- sig   -------->    ||   // A: Here is a sig for this txid !
     ||   -C-- sig   -------->    ||
     ||   -B-- sig   -------->    ||
     ||
@@ -181,7 +181,7 @@ For an usual transaction:
     "params": {
         "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
         "signature": "Bitcoin ECDSA signature as hex",
-        "id": "transaction txid"
+        "txid": "transaction txid"
     }
 }
 ```
@@ -195,7 +195,7 @@ For an emergency transaction:
           "pubkey": "Curve25519 public key used to encrypt the signature",
           "signature": "base64-encoded encrypted Bitcoin ECDSA signature"
         },
-        "id": "transaction txid"
+        "txid": "transaction txid"
     }
 }
 ```
@@ -212,7 +212,7 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 {
     "method": "get_sigs",
     "params": {
-        "id": "transaction txid"
+        "txid": "transaction txid"
     }
 }
 ```
