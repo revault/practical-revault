@@ -9,7 +9,7 @@ channel](network.md).
 
 - [Watchtower](#watchtower)
 - [Cosigning server](#cosigning-server)
-- [Synchronisation server](#synchronisation-server)
+- [Coordinator](#coordinator)
 
 ## Watchtower
 
@@ -19,9 +19,9 @@ its corresponding wallet signs the unvaulting transaction.
 
 In addition, a watchtower will by default revault any unvaulting attempt. We need a way
 for the watchtowers to poll the spending transaction (as its revaulting policy may depend
-on it). For this matter we use the synchronisation server as a proxy between the managers
+on it). For this matter we use the coordinator as a proxy between the managers
 and the watchtowers.
-When noticing an unvaulting attempt, the watchtower will poll the synchronisation server
+When noticing an unvaulting attempt, the watchtower will poll the coordinator
 for a potential spend transaction. If there is one and it is valid according to its
 revaulting policy, it will not do anything. Otherwise it will broadcast the cancel
 transaction.
@@ -40,7 +40,7 @@ transaction.
 ```
 
 ```
-  WATCHTOWER                      SYNC_SERVER
+  WATCHTOWER                      COORDINATOR
     ||   -- get_spend_tx  ------->   ||  // Is there any available spend tx for this vault ?
     ||  <--- spend_tx   ----------   ||  // Here is what i know about. I may be lying but worst case you revault.
 ```
@@ -88,7 +88,7 @@ the transaction, *or if it is unable to bump its feerate with its currently-avai
 
 #### `get_spend_tx`
 
-Sent by a watchtower to the synchronisation server after an unvault event to learn
+Sent by a watchtower to the coordinator after an unvault event to learn
 about the spend transaction.
 
 ```json
@@ -119,9 +119,9 @@ The response to a `get_spend_tx`.
 
 
 
-## Synchronisation server
+## Coordinator
 
-The sync server is a proxy for watchtowers to retrieve spend transactions, and conveniently
+The coordinator is a proxy for watchtowers to retrieve spend transactions, and conveniently
 permits to share pre-signed transaction signatures without interaction between participants.
 
 As each wallet will verify and store signatures locally, the server isn't trusted and can be
@@ -129,7 +129,7 @@ managed by the organisation deploying Revault itself or any third party without 
 loss of funds.
 
 Acting as a cache in place of -example given- a p2p network, the information stored on the
-synchronisation server is transient.
+coordinator is transient.
 
 All [revaulting transactions][revaulting_txs] (the cancel tx and both emergency txs) are signed
 paying a fixed `22 sat/WU` feerate and using the `ALL | ANYONECANPAY` signature hash flag. This
@@ -146,7 +146,7 @@ until the Bitcoin network deploys [package relay][package_relay].
 ### Rough flow
 
 ```
- STAKEHOLDER's WALLET          SYNC_SERVER
+ STAKEHOLDER's WALLET          COORDINATOR
     ||   -A-- sig   -------->    ||   // A: Here is a sig for this id !
     ||   -C-- sig   -------->    ||
     ||   -B-- sig   -------->    ||
@@ -162,7 +162,7 @@ until the Bitcoin network deploys [package relay][package_relay].
 
 ```
 
- MANAGER's WALLET                SYNC_SERVER
+ MANAGER's WALLET                COORDINATOR
     ||   -- set_spend_tx  ------->   ||  // I'm going to unvault this vault, here is the
                                             fully signed spend transaction so watchtowers
                                             don't freak out.
@@ -382,7 +382,7 @@ The server must:
 #### Revocation transactions signing step
 
 ```
-stakeholder           sync_server
+stakeholder           coordinator
    +                      +
    | +-sig emer---------> |
    | +-sig emer_unvault-> |
@@ -406,15 +406,15 @@ stakeholder           sync_server
 
 | flow                       | request               |
 | -------------------------- | --------------------- |
-| stakeholder -> sync_server | [sig](#sig-1)         |
-| stakeholder -> sync_server | [get_sigs](#get_sigs) |
+| stakeholder -> coordinator | [sig](#sig-1)         |
+| stakeholder -> coordinator | [get_sigs](#get_sigs) |
 | stakeholder -> watchtower  | [sig](#sig)           |
 | watchtower -> stakeholder  | [sig_ack](#sig_ack)   |
 
 #### Activation signing step
 
 ```
-stakeholder      sync_server
+stakeholder      coordinator
    +                 +
    | +-sig unvault-> |
    |                 |
@@ -429,8 +429,8 @@ manager              |
 
 | flow                       | request               |
 | -------------------------- | --------------------- |
-| stakeholder -> sync_server | [sig](#sig-1)         |
-| stakeholder -> sync_server | [get_sigs](#get_sigs) |
+| stakeholder -> coordinator | [sig](#sig-1)         |
+| stakeholder -> coordinator | [get_sigs](#get_sigs) |
 
 ### Spending process
 
@@ -442,7 +442,7 @@ manager         cosig_server
    | <-sign result-+ |
    |                 +
    |
-   |                       sync_server
+   |                       coordinator
    |                           +
    |                           |
    | +-set_spend_tx ---------> |
@@ -451,7 +451,7 @@ manager         cosig_server
 
       ... Broadcast the unvault tx ...
 
-                           sync_server              watchtower
+                           coordinator              watchtower
                                +                         +
                                |                         |
                                | <-- get_spend_tx ------ |
@@ -462,8 +462,8 @@ manager         cosig_server
 | flow                      | request                             |
 | ------------------------- | ----------------------------------- |
 | manager -> cosig_server   | [sign](#sign)                       |
-| manager -> sync_server    | [set_spend_tx](#set_spend_tx)       |
-| watchtower -> sync_server | [get_spend_tx](#get_spend_tx)       |
+| manager -> coordinator    | [set_spend_tx](#set_spend_tx)       |
+| watchtower -> coordinator | [get_spend_tx](#get_spend_tx)       |
 
 
 

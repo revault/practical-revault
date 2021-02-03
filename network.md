@@ -4,9 +4,9 @@ This specification describes security-critical design choices for how machines i
 
 ### Entity Types
 
-The humans participating in an instance of the Revault protocol can have the role of Stakeholder and/ or Manager. Each Stakeholder will operate the following devices: portable device with revaultd, hardware wallet, co-signing server, and a watchtower. Managers will operate only a portable device with revaultd and a hardware wallet. The Sync Server will be operated by the organization using revault.
+The humans participating in an instance of the Revault protocol can have the role of Stakeholder and/ or Manager. Each Stakeholder will operate the following devices: portable device with revaultd, hardware wallet, co-signing server, and a watchtower. Managers will operate only a portable device with revaultd and a hardware wallet. The Coordinator will be operated by the organization using revault.
 
-In a future version of the protocol the Sync Server and additional watchtowers may be outsourced to a service provider.
+In a future version of the protocol the Coordinator and additional watchtowers may be outsourced to a service provider.
 
 ### Network Map 
 
@@ -33,13 +33,13 @@ Consider the flow of [messages](https://github.com/re-vault/practical-revault/bl
 
 Stakeholder -> their Watchtower
 
-Stakeholder -> Sync Server
+Stakeholder -> Coordinator
 
 Manager -> Cosigner
 
-Manager -> Sync Server
+Manager -> Coordinator
 
-Watchtower -> Sync Server
+Watchtower -> Coordinator
 
 This determines with which entities the static public keys must be shared (as part of configuration information) during the initialization ceremony. 
 
