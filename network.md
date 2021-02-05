@@ -4,9 +4,9 @@ This specification describes security-critical design choices for how machines i
 
 ### Entity Types
 
-The humans participating in an instance of the Revault protocol can have the role of Stakeholder and/ or Manager. Each Stakeholder will operate the following devices: portable device with revaultd, hardware wallet, co-signing server, and a watchtower. Managers will operate only a portable device with revaultd and a hardware wallet. The sync server will be operated by the organization using revault.
+The humans participating in an instance of the Revault protocol can have the role of Stakeholder and/ or Manager. Each Stakeholder will operate the following devices: portable device with revaultd, hardware wallet, co-signing server, and a watchtower. Managers will operate only a portable device with revaultd and a hardware wallet. The Coordinator will be operated by the organization using revault.
 
-In a future version of the protocol the sync server and additional watchtowers may be outsourced to a service provider.
+In a future version of the protocol the Coordinator and additional watchtowers may be outsourced to a service provider.
 
 ### Network Map 
 
@@ -27,21 +27,21 @@ The design of the Revault network is logically separated into 4 layers:
 
 ### Noise Channels
 
-Authenticated and encrypted channels will be established using noise_KK or noise_KX. The X/K notation states whether the initiator's (first token) or the reponder's (second token) static public key is known (K) by the counterparty or is transmitted (X) during the handshake. So, for example, noise_KX means that the initiator's static public key is known to the responder before the handshake.
+Authenticated and encrypted channels are established using noise_KK. The KK notation states that both the initiator's and the responder's static public keys are known to each other during the handshake.
 
 Consider the flow of [messages](https://github.com/re-vault/practical-revault/blob/master/messages.md) for spending and for routine transaction signing. We use the following definition of directionality for communications, with initiators on the left and responders on the right. 
 
-Stakeholder -> their Watchtower (Noise_KK)
+Stakeholder -> their Watchtower
 
-Stakeholder -> Sync Server (Noise_KX)
+Stakeholder -> Coordinator
 
-Manager -> Cosigner (Noise_KX)
+Manager -> Cosigner
 
-Manager -> Sync Server (Noise_KX)
+Manager -> Coordinator
 
-Watchtower -> Sync Server (Noise_KX)
+Watchtower -> Coordinator
 
-This determines which static public keys need to be generated during the initialization ceremony and with which entities they must be shared (as part of configuration information). 
+This determines with which entities the static public keys must be shared (as part of configuration information) during the initialization ceremony. 
 
 > TODO: write and link to ceremony.md
 
