@@ -143,6 +143,8 @@ funds. They lock coins to what we call an EDV (Emergency Deep Vault): a script c
 by the participants and kept obfuscated by the properties of P2WSH, as the emergency 
 transactions are never meant to be used.
 
+The Emergency `scriptPubKey` is not known to the managers.
+
 
 ### vault_emergency_tx
 

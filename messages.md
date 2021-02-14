@@ -144,16 +144,16 @@ until the Bitcoin network deploys [package relay][package_relay].
 #### `sig`
 
 Sent by a stakeholder wallet at any point in time to share the signature for a transaction
-with all other stakeholders and all managers (in the case of unvault and cancel transactions).
+with all other stakeholders and all managers.  
+Note that the managers are able to poll the Emergency transactions signatures from the
+coordinator. However, since they are not able to reconstruct the transactions (they don't
+know the `scriptPubKey`) they can't use them to DOS the operations by broadcasting them
+to the Bitcoin network.
 
 The wallet can safely post its signature for the `cancel` and `emergency`s of each
 `vault` without waiting for others. However, it must wait for everyone to have signed
 the `cancel` and `emergency` transactions and its watchtower to have verified and stored
 the signature before possibly sharing its signature for the unvault transaction.
-
-The signature for the emergency transaction is encrypted using the static public key of
-each of the other stakeholders. (FIXME: link to the ceremony)  
-We currently use `X25519-XSalsa20-Poly1305` for the encryption of the signature.
 
 A wallet is not bound to share its signature for the unvault transaction. This flexibility
 allows "unactive vaults": a multisig which is not spendable by default but still guarded
@@ -166,35 +166,12 @@ transaction.
 Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
 
-If the signature is for:
-  - An emergency transaction:
-    - The `signature` field must not be set.
-    - The `encrypted_signature` signature object must be filled.
-  - Any other transaction:
-    - The `signature` string must be set.
-    - The `encrypted_signature` field must not be set.
-
-For an usual transaction:
 ```json
 {
     "method": "sig",
     "params": {
         "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
-        "signature": "Bitcoin ECDSA signature as hex",
-        "txid": "transaction txid"
-    }
-}
-```
-For an emergency transaction:
-```json
-{
-    "method": "sig",
-    "params": {
-        "pubkey": "Secp256k1 public key used to sign the transaction (hex)",
-        "encrypted_signature": {
-          "pubkey": "Curve25519 public key used to encrypt the signature",
-          "signature": "base64-encoded encrypted Bitcoin ECDSA signature"
-        },
+        "signature": "Bitcoin ECDSA signature (without sighash type byte) as hex",
         "txid": "transaction txid"
     }
 }
@@ -217,19 +194,6 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 }
 ```
 
-The server answers with a (possibly incomplete) mapping of each `secp256k1` Bitcoin pubkey
-to an object containing the (maybe encrypted) signature required for this transaction to
-be valid.  
-If the requested transaction is:
-  - An emergency transaction:
-    - The `signature` field must not be set.
-    - The `encrypted_signature` signature object must be set.
-  - Any other transaction:
-    - The `signature` field must be set.
-    - The `encrypted_signature` field must not be set.
-
-
-For an "usual" transaction
 ```json
 {
     "result": {
@@ -244,30 +208,6 @@ For an "usual" transaction
     }
 }
 ```
-Or for an emergency transaction
-```json
-{
-    "result": {
-        "signatures": {
-            "pubkeyA": {
-                "encrypted_signature": {
-                    "Curve25519_pubkey-1": "encrypted Bitcoin ECDSA signature",
-                    "Curve25519_pubkey-2": "encrypted Bitcoin ECDSA signature",
-                    "Curve25519_pubkey-N": "encrypted Bitcoin ECDSA signature"
-                }
-            },
-            "pubkeyC": {
-                "encrypted_signature": {
-                    "Curve25519_pubkey-1": "encrypted Bitcoin ECDSA signature",
-                    "Curve25519_pubkey-2": "encrypted Bitcoin ECDSA signature",
-                    "Curve25519_pubkey-N": "encrypted Bitcoin ECDSA signature"
-                }
-            }
-        }
-    }
-}
-```
-With `N` the number of stakeholders.
 
 Note the absence of `pubkeyB` in the above samples.
 
