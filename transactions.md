@@ -15,7 +15,7 @@ replace-by-fee (RBF).
 - [spend_tx](#spend_tx)
 - [cancel_tx](#cancel_tx)
 - [emergency_txs](#emergency_txs)
-    - [vault_emergency_tx](#vault_emergency_tx)
+    - [deposit_emergency_tx](#deposit_emergency_tx)
     - [unvault_emergency_tx](#unvault_emergency_tx)
 - [bypass_tx](#bypass_tx)
 
@@ -30,10 +30,10 @@ N/A
 
 #### OUT
 
-At least one output paying to `vault_descriptor`, with:
+At least one output paying to `deposit_descriptor`, with:
 ```
-vault_descriptor = wsh(vault_witness_script)
-vault_witness_script = thresh(N, pubkey1, pubkey2, ..., pubkeyN)
+deposit_descriptor = wsh(deposit_witness_script)
+deposit_witness_script = thresh(N, pubkey1, pubkey2, ..., pubkeyN)
 ```
 
 
@@ -54,7 +54,7 @@ servers) after `X` blocks.
     - vout: `<deposit_tx vout>`
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
-    - witness: `satisfy(vault_descriptor)`
+    - witness: `satisfy(deposit_descriptor)`
 
 #### OUT
 
@@ -133,7 +133,7 @@ pays back to a deposit output (it is therefore another vault deposit transaction
 - count: 1
 - outputs[0]:
     - value: `<unvault_tx outputs[0] value - tx_fee>`
-    - scriptPubkey: `vault_descriptor`
+    - scriptPubkey: `deposit_descriptor`
 
 
 ## emergency_txs
@@ -146,7 +146,7 @@ transactions are never meant to be used.
 The Emergency `scriptPubKey` is not known to the managers.
 
 
-### vault_emergency_tx
+### deposit_emergency_tx
 
 The transaction which spends the [`deposit_tx`](deposit_tx) output to the EDV by the `N`-of-`N` path.
 
@@ -161,13 +161,13 @@ The transaction which spends the [`deposit_tx`](deposit_tx) output to the EDV by
     - vout: `<deposit_tx vout>`
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
-    - witness: `satisfy(vault_descriptor)`
+    - witness: `satisfy(deposit_descriptor)`
 
 #### OUT
 
 - count: 1
 - outputs[0]:
-    - value: `<vault_tx output value - fees>`
+    - value: `<deposit_tx output value - fees>`
     - scriptPubkey: `0x00 SHA256(<EDV_script>)`
 
 
@@ -213,7 +213,7 @@ Bypass tx spends the [`deposit_tx`](deposit_tx) and pays to arbitrary addresses.
     - vout: `<deposit_tx vout>`
     - sequence: `0xfffffffd`
     - scriptSig: `<empty>`
-    - witness: `satisfy(vault_descriptor)`
+    - witness: `satisfy(deposit_descriptor)`
 
 #### OUT
 
