@@ -179,7 +179,7 @@ until the Bitcoin network deploys [package relay][package_relay].
 ```
 
  MANAGER's WALLET                COORDINATOR
-    ||   -- set_spend_tx  ------->   ||  // I'm going to unvault this vault, here is the
+    ||   -- set_spend_tx  ------->   ||  // I'm going to unvault these vaults, here is the
                                             fully signed spend transaction so watchtowers
                                             don't freak out.
 ```
@@ -270,14 +270,14 @@ explicit error from the server).
 
 #### `set_spend_tx`
 
-Sent by a manager to advertise the spend transaction that will eventually be used for a
-specific unvault.
+Sent by a manager to advertise the Spend transaction that will eventually be used for a
+set of Unvault.
 
 ```json
 {
     "method": "request_spend",
     "params": {
-        "deposit_outpoint": "txid:vout",
+        "deposit_outpoint": ["txid:vout", "txid:vout"],
         "spend_tx": "hex of Bitcoin-serialized fully-signed spend transaction"
     }
 }
