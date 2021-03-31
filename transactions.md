@@ -115,6 +115,11 @@ The CPFP output value is adjusted depending on the actual transaction size.
 The transaction which spends the [`unvault_tx`](unvault_tx) `output[0]` using the N-of-N path and 
 pays back to a deposit output (it is therefore another vault deposit transaction).
 
+In addition to the deposit output, the Cancel transaction features a data-carrying output committing
+to the Unvault transaction it's used for in order for the `ANYONECANPAY | ALL` signature to not be replayed
+on another Cancel transaction paying to the same deposit.
+
+
 - version: 2
 - locktime: 0
 
@@ -130,10 +135,13 @@ pays back to a deposit output (it is therefore another vault deposit transaction
 
 #### OUT
 
-- count: 1
+- count: 2
 - outputs[0]:
     - value: `<unvault_tx outputs[0] value - tx_fee>`
     - scriptPubkey: `deposit_descriptor`
+- outputs[1]:
+    - value: `0`
+    - scriptPubkey: '`RETURN <unvault_txid>`'
 
 
 ## emergency_txs
@@ -144,6 +152,10 @@ by the participants and kept obfuscated by the properties of P2WSH, as the emerg
 transactions are never meant to be used.
 
 The Emergency `scriptPubKey` is not known to the managers.
+
+In addition to the deposit output, the Emergency transaction features a data-carrying output committing
+to the Deposit transaction it's used for in order for the `ANYONECANPAY | ALL` signature to not be replayed
+on another Emergency transaction paying to the same deposit.
 
 
 ### deposit_emergency_tx
@@ -165,15 +177,22 @@ The transaction which spends the [`deposit_tx`](deposit_tx) output to the EDV by
 
 #### OUT
 
-- count: 1
+- count: 2
 - outputs[0]:
     - value: `<deposit_tx output value - fees>`
     - scriptPubkey: `0x00 SHA256(<EDV_script>)`
+- outputs[1]:
+    - value: `0`
+    - scriptPubkey: `RETURN <sha256(deposit_tx txid | deposit_tx vout)>`
 
 
 ### unvault_emergency_tx
 
 This transaction spends the [`unvault_tx`](unvault_tx) `output[0]` to the EDV by the `N`-of-`N` path.
+
+In addition to the deposit output, the Unvault Emergency transaction features a data-carrying output committing
+to the Unvault transaction it's used for in order for the `ANYONECANPAY | ALL` signature to not be replayed
+on another Unvault Emergency transaction paying to the same deposit.
 
 - version: 2
 - locktime: 0
@@ -190,10 +209,13 @@ This transaction spends the [`unvault_tx`](unvault_tx) `output[0]` to the EDV by
 
 #### OUT
 
-- count: 1
+- count: 2
 - outputs[0]:
     - value: `<unvault_tx outputs[0] value - fees>`
     - scriptPubkey: `0x00 SHA256(<EDV_script>)`
+- outputs[1]:
+    - value: `0`
+    - scriptPubkey: '`RETURN <unvault_txid>`'
 
 
 ## bypass_tx
