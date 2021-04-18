@@ -275,7 +275,7 @@ set of Unvault.
 
 ```json
 {
-    "method": "request_spend",
+    "method": "set_spend_tx",
     "params": {
         "deposit_outpoint": ["txid:vout", "txid:vout"],
         "spend_tx": "hex of Bitcoin-serialized fully-signed spend transaction"
