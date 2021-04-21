@@ -48,6 +48,8 @@ transaction with its watchtower. The wallet must wait for the tower's `sig_ack` 
 revocation transactions before sharing its signature for the unvault transaction with the other
 participants.
 
+#### Request
+
 ```json
 {
     "method": "sig",
@@ -63,8 +65,7 @@ participants.
 }
 ```
 
-
-#### `sig_ack`
+#### Response
 
 The watchtower must not send an ACK if it did not successfully reconstruct and check
 the transaction, *or if it is unable to bump its feerate with its currently-available utxos*.
@@ -108,6 +109,9 @@ more vault(s).
 As the spend transaction must only spend unvault transaction outputs, the cosigning server
 shall sign all inputs (if all of them were not already signed).
 
+
+#### Request
+
 ```json
 {
     "method": "sign",
@@ -116,6 +120,8 @@ shall sign all inputs (if all of them were not already signed).
     }
 }
 ```
+
+#### Response
 
 The server must:
   - if any input was already signed
@@ -218,6 +224,9 @@ transaction.
 Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
 flag.
 
+
+#### Request
+
 ```json
 {
     "method": "sig",
@@ -229,13 +238,25 @@ flag.
 }
 ```
 
+#### Response
 
-No explicit ACK from the server as the wallet can just `get_sigs` for its own signature.
+The Coordinator must only set `ack` to `true` if it claims to have successfully stored the signature.
+
+```json
+{
+    "result": {
+        "ack": true
+    }
+}
+```
 
 
 #### `get_sigs`
 
 Sent by a wallet to retrieve all signatures for a specific transaction.
+
+
+#### Request
 
 ```json
 {
@@ -245,6 +266,8 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
     }
 }
 ```
+
+#### Response
 
 ```json
 {
@@ -263,15 +286,14 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 
 Note the absence of `pubkeyB` in the above samples.
 
-If a wallet notices its transaction to be absent, it must send it again. It can either
-mean the server didn't store it (no explicit ACK) or someone was unhappy with it (no
-explicit error from the server).
-
 
 #### `set_spend_tx`
 
 Sent by a manager to advertise the Spend transaction that will eventually be used for a
 set of Unvault.
+
+
+#### Request
 
 ```json
 {
@@ -283,11 +305,27 @@ set of Unvault.
 }
 ```
 
+#### Response
+
+The Coordinator must only set `ack` to `true` if it claims to have successfully stored the Spend
+transaction.
+
+```json
+{
+    "result": {
+        "ack": true
+    }
+}
+```
+
 
 #### `get_spend_tx`
 
 Sent by a watchtower to the coordinator after an unvault event to learn
 about the spend transaction.
+
+
+#### Request
 
 ```json
 {
@@ -298,10 +336,7 @@ about the spend transaction.
 }
 ```
 
-
-#### `spend_tx`
-
-The response to a `get_spend_tx`.
+#### Response
 
 ```json
 {
