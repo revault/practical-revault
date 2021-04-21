@@ -6,6 +6,11 @@ flow of operations.
 These messages are exchanged on top of an [encrypted and authenticated communication
 channel](network.md).
 
+JSON is used (pretty similarly to JSONRPC2) in order to prime debuggability over efficiency for
+the v0 specifications.  
+Parsing should not be strict (ie unknown entries in a mapping should be disregarded) for forward
+compatibility.
+
 
 - [Watchtower](#watchtower)
 - [Cosigning server](#cosigning-server)
