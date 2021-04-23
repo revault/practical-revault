@@ -14,8 +14,8 @@ channel](network.md).
 ## Watchtower
 
 At least one watchtower is ran by every stakeholder, and at most one wallet is paired with
-each watchtower. A watchtower needs to be able to sign any revocation transaction before
-its corresponding wallet signs the unvaulting transaction.
+each watchtower. A watchtower needs to be able to see all fully-signed revocation transaction
+before its corresponding wallet signs the unvaulting transaction.
 
 In addition, a watchtower will by default revault any unvaulting attempt. We need a way
 for the watchtowers to poll the spending transaction (as its revaulting policy may depend
