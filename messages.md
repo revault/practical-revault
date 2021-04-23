@@ -129,15 +129,25 @@ shall sign all inputs (if all of them were not already signed).
 #### Response
 
 The server must:
-  - if any input was already signed
-    - return the empty string `""`
+  - if no prevout was already signed
+    - return the PSBT with its (newly generated) signature appended to each input
+  - if all prevouts were already signed
+    - return the PSBT with its (previously generated) signature appended to each input
   - else
-    - return the PSBT with its signature appended for all inputs
+    - return `null`
 
 ```json
 {
     "result": {
         "tx": "psbt"
+    }
+}
+```
+Or
+```json
+{
+    "result": {
+        "tx": null
     }
 }
 ```
