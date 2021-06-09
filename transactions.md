@@ -39,7 +39,7 @@ deposit_witness_script = thresh(N, pubkey1, pubkey2, ..., pubkeyN)
 
 ## unvault_tx
 
-The transaction which spends the [`deposit_tx`](deposit_tx) deposit output, and creates an
+The transaction which spends the [`deposit_tx`](#deposit_tx) deposit output, and creates an
 unvault output spendable by the `N` stakeholders or the managers (along with the cosigning
 servers) after `X` blocks.
 
@@ -80,7 +80,7 @@ cpfp_witness_script = thresh(1, pubkey1, pubkey2, ..., pubkeyM) # The pubkeys be
 
 ## spend_tx
 
-The transaction which spends one or many [`unvault_tx`](unvault_tx) `output[0]` by the [`M` + cosigners]
+The transaction which spends one or many [`unvault_tx`](#unvault_tx) `output[0]` by the [`M` + cosigners]
 path, only spendable after `X` blocks.
 The CPFP output value is adjusted depending on the actual transaction size.
 
@@ -112,7 +112,7 @@ The CPFP output value is adjusted depending on the actual transaction size.
 
 ## cancel_tx
 
-The transaction which spends the [`unvault_tx`](unvault_tx) `output[0]` using the N-of-N path and 
+The transaction which spends the [`unvault_tx`](#unvault_tx) `output[0]` using the N-of-N path and 
 pays back to a deposit output (it is therefore another vault deposit transaction).
 
 - version: 2
@@ -148,7 +148,7 @@ The Emergency `scriptPubKey` is not known to the managers.
 
 ### deposit_emergency_tx
 
-The transaction which spends the [`deposit_tx`](deposit_tx) output to the EDV by the `N`-of-`N` path.
+The transaction which spends the [`deposit_tx`](#deposit_tx) output to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
@@ -173,7 +173,7 @@ The transaction which spends the [`deposit_tx`](deposit_tx) output to the EDV by
 
 ### unvault_emergency_tx
 
-This transaction spends the [`unvault_tx`](unvault_tx) `output[0]` to the EDV by the `N`-of-`N` path.
+This transaction spends the [`unvault_tx`](#unvault_tx) `output[0]` to the EDV by the `N`-of-`N` path.
 
 - version: 2
 - locktime: 0
@@ -200,7 +200,7 @@ This transaction spends the [`unvault_tx`](unvault_tx) `output[0]` to the EDV by
 
 Bypass txs are used in the case where stakeholders need immediate access to funds. Bypass 
 txs avoid the controls on expenses set by stakeholders and enforced by watchtowers. A 
-Bypass tx spends the [`deposit_tx`](deposit_tx) and pays to arbitrary addresses.
+Bypass tx spends the [`deposit_tx`](#deposit_tx) and pays to arbitrary addresses.
 
 - version: 2
 - locktime: 0
