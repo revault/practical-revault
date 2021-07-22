@@ -65,7 +65,8 @@ participants.
             ...
         },
         "txid": "txid",
-        "deposit_outpoint": "deposit utxo outpoint"
+        "deposit_outpoint": "deposit utxo outpoint",
+        "derivation_index": 42
     }
 }
 ```
