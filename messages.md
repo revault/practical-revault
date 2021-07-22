@@ -49,9 +49,16 @@ transaction.
 #### `sig`
 
 Sent at any point in time by a stakeholder's wallet to share all signatures for a revocation
-transaction with its watchtower. The wallet must wait for the tower's `sig_ack` on all
-revocation transactions before sharing its signature for the unvault transaction with the other
-participants.
+transaction with its watchtower.
+
+The wallet must first send the Emergency transaction signatures. Then it must share the
+UnvaultEmergency transaction signatures.  
+Only prior to delegating a vault (and thereby sharing its Unvault transaction signature with the
+managers) it must share the Cancel transaction signature, and wait for a positive response for the
+watchtower before sharing the Unvault transaction signature.
+
+This order is established so the watchtower can allocate fee-bumping reserve only when a vault is
+delegated.
 
 #### Request
 
