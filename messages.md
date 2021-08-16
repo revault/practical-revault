@@ -338,6 +338,8 @@ transaction.
 
 Sent by a watchtower to the coordinator after an unvault event to learn
 about the spend transaction.
+The coordinator might not have the spend transaction, in which case it will
+return `null`.
 
 
 #### Request
@@ -357,6 +359,14 @@ about the spend transaction.
 {
     "result": {
         "spend_tx": "hex of Bitcoin-serialized spend tx"
+    }
+}
+```
+or, if the coordinator doesn't have the spend:
+```json
+{
+    "result": {
+        "spend_tx": null,
     }
 }
 ```
