@@ -3,8 +3,8 @@
 The v0 specification for the initialization and operation of the [Revault](revault.pdf)
 custody protocol.
 
-Contributions in any form are very welcome. Discussions happen in issues or on the
-`#revault` channel on [freenode](https://webchat.freenode.net/).
+Contributions in any form are very welcome. Discussions happen in issues or at
+[`#revault` on Libera](https://web.libera.chat/?channels=#revault)
 
 ## Table of contents
 
