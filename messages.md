@@ -323,7 +323,7 @@ set of Unvault.
     "method": "set_spend_tx",
     "params": {
         "deposit_outpoint": ["txid:vout", "txid:vout"],
-        "spend_tx": "hex of Bitcoin-serialized fully-signed spend transaction"
+        "spend_tx": "base64 of Bitcoin-serialized fully-signed spend transaction"
     }
 }
 ```
@@ -366,7 +366,7 @@ return `null`.
 ```json
 {
     "result": {
-        "spend_tx": "hex of Bitcoin-serialized spend tx"
+        "spend_tx": "base64 of Bitcoin-serialized spend tx"
     }
 }
 ```
