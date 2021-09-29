@@ -152,12 +152,12 @@ reduce the funds burden on *each* of the watchtowers.
 
 ## emergency_txs
 
-Emergency transactions are used as deterrents against threats targetting stakeholders' 
-funds. They lock coins to what we call an EDV (Emergency Deep Vault): a script chosen 
-by the participants and kept obfuscated by the properties of P2WSH, as the emergency 
+Emergency transactions are used as deterrents against threats targeting stakeholders'
+funds. They lock coins to what we call an EDV (Emergency Deep Vault): a script chosen
+by the participants and kept obfuscated by the properties of P2WSH, as the emergency
 transactions are never meant to be used.
 
-Both Emergency transactions are signed at a fixed `22 sat/WU` feerate.
+Both Emergency transactions are signed at a fixed `75 sat/WU` feerate.
 
 Both Emergency transaction are signed using the `ALL | ANYONECANPAY` signature hash flag,
 to allow watchtowers (or anyone else) to attach fee-bumping inputs.
