@@ -176,17 +176,6 @@ loss of funds.
 Acting as a cache in place of -example given- a p2p network, the information stored on the
 coordinator is transient.
 
-All [revaulting transactions][revaulting_txs] (the cancel tx and both emergency txs) are signed
-paying a fixed `22 sat/WU` feerate and using the `ALL | ANYONECANPAY` signature hash flag. This
-is in order to reduce the funds burden on *each* of the watchtowers.
-
-The [unvault transaction][unvault_tx] is signed using a fixed `6 sat/WU` feerate. This is
-a completely arbitrary value that was chosen to avoid blocking operations too early in case of
-a huge load of transactions on the network and an increase of the mempools minimum feerate.  
-This transaction's fees can be bumped if not competitive (using the CPFP output) but
-it will likely not be relayed if the mempools minimum feerate goes above `84 000 sat/kw`
-until the Bitcoin network deploys [package relay][package_relay].
-
 
 ### Rough flow
 
@@ -476,4 +465,3 @@ manager         cosig_server
 
 [revaulting_txs]: transactions.md#cancel_tx
 [unvault_tx]: transactions.md#unvault_tx
-[package_relay]: https://github.com/bitcoin/bitcoin/issues/14895

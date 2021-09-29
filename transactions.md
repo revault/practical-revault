@@ -43,6 +43,14 @@ The transaction which spends the [`deposit_tx`](#deposit_tx) deposit output, and
 unvault output spendable by the `N` stakeholders or the managers (along with the cosigning
 servers) after `X` blocks.
 
+The Unvault transaction is signed using a fixed `6 sat/WU` feerate. This is a
+completely arbitrary value that was chosen to avoid blocking operations too early
+in case of a huge load of transactions on the network and an increase of the
+network mempools minimum feerate.  
+This transaction's fees can be bumped if not competitive (using the CPFP output) but
+it will likely not be relayed if the network mempools minimum feerate goes above
+`84 000 sat/kw` until [package relay][package_relay] is deployed on the Bitcoin network.
+
 - version: 2
 - locktime: 0
 
@@ -115,6 +123,12 @@ The CPFP output value is adjusted depending on the actual transaction size.
 The transaction which spends the [`unvault_tx`](#unvault_tx) `output[0]` using the N-of-N path and 
 pays back to a deposit output (it is therefore another vault deposit transaction).
 
+The Cancel transaction is signed using the `ALL | ANYONECANPAY` signature hash flag, to
+allow watchtowers (or anyone else) to attach fee-bumping inputs.
+
+The Cancel transaction is signed at a fixed `22 sat/WU` feerate. This is in order to
+reduce the funds burden on *each* of the watchtowers.
+
 - version: 2
 - locktime: 0
 
@@ -142,6 +156,11 @@ Emergency transactions are used as deterrents against threats targetting stakeho
 funds. They lock coins to what we call an EDV (Emergency Deep Vault): a script chosen 
 by the participants and kept obfuscated by the properties of P2WSH, as the emergency 
 transactions are never meant to be used.
+
+Both Emergency transactions are signed at a fixed `22 sat/WU` feerate.
+
+Both Emergency transaction are signed using the `ALL | ANYONECANPAY` signature hash flag,
+to allow watchtowers (or anyone else) to attach fee-bumping inputs.
 
 The Emergency `scriptPubKey` is not known to the managers.
 
@@ -218,3 +237,6 @@ Bypass tx spends the [`deposit_tx`](#deposit_tx) and pays to arbitrary addresses
 #### OUT
 
 Unspecified
+
+
+[package_relay]: https://github.com/bitcoin/bitcoin/issues/14895
