@@ -49,7 +49,7 @@ in case of a huge load of transactions on the network and an increase of the
 network mempools minimum feerate.  
 This transaction's fees can be bumped if not competitive (using the CPFP output) but
 it will likely not be relayed if the network mempools minimum feerate goes above
-`84 000 sat/kw` until [package relay][package_relay] is deployed on the Bitcoin network.
+`24 sat/vb` until [package relay][package_relay] is deployed on the Bitcoin network.
 
 - version: 2
 - locktime: 0
