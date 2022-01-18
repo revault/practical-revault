@@ -36,42 +36,40 @@ transaction.
 
 ```
  STAKEHOLDER's WALLET                      WATCHTOWER
-    ||   -- sig emer ------------>   ||  // Here are all sigs for the emergency transaction.
-    ||  <--- sig_ack  ---------      ||  // I succesfully re-constructed, checked, and stored this transaction.
-    ||   -- sig emer_unvault ---->   ||
-    ||  <--- sig_ack  ---------      ||
-    ||   -- sig cancel   -------->   ||
-    ||  <--- sig_ack  ---------      ||
+    ||   -- sigs -------------->     ||  // Here are all sigs for the emergency transaction.
+    ||  <-------- sigs_ack -----     ||  // I succesfully re-constructed, checked, and stored this transaction.
 ```
 
 ### Messages format
 
-#### `sig`
+#### `sigs`
 
-Sent at any point in time by a stakeholder's wallet to share all signatures for a revocation
-transaction with its watchtower.
+Sent at any point in time by a stakeholder's wallet to share the revocation transactions' signature
+with (one of) its watchtower(s).
 
-The wallet must first send the Emergency transaction signatures. Then it must share the
-UnvaultEmergency transaction signatures.  
-Only prior to delegating a vault (and thereby sharing its Unvault transaction signature with the
-managers) it must share the Cancel transaction signature, and wait for a positive response for the
-watchtower before sharing the Unvault transaction signature.
-
-This order is established so the watchtower can allocate fee-bumping reserve only when a vault is
-delegated.
+It must wait for a positive response from the watchtower before sharing the Unvault transaction
+signature.
 
 #### Request
 
 ```json
 {
-    "method": "sig",
+    "method": "sigs",
     "params": {
         "signatures": {
-            "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-            "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-            ...
+          "emergency": {
+              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+          },
+          "cancel": {
+              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+          }
+          "unvault_emergency": {
+              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+          }
         },
-        "txid": "txid",
         "deposit_outpoint": "deposit utxo outpoint",
         "derivation_index": 42
     }
@@ -80,14 +78,13 @@ delegated.
 
 #### Response
 
-The watchtower must not send an ACK if it did not successfully reconstruct and check
-the transaction, *or if it is unable to bump its feerate with its currently-available utxos*.
+The watchtower must not send an ACK if it did not successfully checked and stored all transactions'
+signatures, *or if it is unable to bump its feerate with its currently-available utxos*.
 
 ```json
 {
     "result": {
         "ack": true,
-        "txid": "txid"
     }
 }
 ```
