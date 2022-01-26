@@ -170,6 +170,10 @@ As each wallet will verify and store signatures locally, the server isn't truste
 managed by the organisation deploying Revault itself or any third party without risking any
 loss of funds.
 
+The server will also broadcast the spend transactions when the unvault timelock is expired; this
+way managers could shut down their wallets after broadcasting the unvault without further delaying
+the spend broadcast.
+
 Acting as a cache in place of -example given- a p2p network, the information stored on the
 coordinator is transient.
 
