@@ -1,14 +1,16 @@
 # Practical Revault
 
-The v0 specification for the initialization and operation of the [Revault](revault.pdf)
-custody protocol.
+The v0 specification for the initialization and operation of the Revault custody
+protocol.
+
+See the [introduction](introduction.md) for a high-level description of Revault.
 
 Contributions in any form are very welcome. Discussions happen in issues or at
-[`#revault` on Libera](https://web.libera.chat/?channels=#revault)
+[`#revault` on Libera](https://web.libera.chat/?channels=#revault).
 
 ## Table of contents
 
-- [Revault description](revault.pdf)
+- [Revault description](introduction.md)
 - [Messages](messages.md)
 - [Transaction](transactions.md)
 - [Transport](transport.md)
