@@ -28,7 +28,7 @@ In addition, Revault comes with an (optional) deterrent feature for emergency sc
 
 ## Process and Revault Transaction Types
 
-![Revault Transaction Graph. Note that only one of the Cancel, Unvault Emergency or Spend TXs can consume a specific UTXO, and that the Spend TX has lowest priority as it must wait for the unvault time-lock to expire.](tx_diagram.jpg)
+![Revault Transaction Graph. Note that only one of the Cancel, Unvault Emergency or Spend TXs can consume a specific UTXO, and that the Spend TX has lowest priority as it must wait for the unvault time-lock to expire.](img/tx_diagram.jpg)
 
 Funds enter custody through Deposit transactions (TXs) as unspent-transaction-outputs (UTXOs) locked to the *[deposit output descriptor](transactions.md#out)*, an N-of-N multi-signature among stakeholders. After receiving a deposit, the stakeholders exchange signatures for a set of 4 transactions which are _not broadcast_. These "pre-signed" transactions are used by stakeholders to control the flow of funds and enable the delegation and emergency deterrent features of Revault. As seen in the diagram, they include; Emergency, Unvault, Cancel and Unvault Emergency TXs.
 
