@@ -58,16 +58,16 @@ signature.
     "params": {
         "signatures": {
           "emergency": {
-              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
           },
           "cancel": {
-              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
           }
           "unvault_emergency": {
-              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
           }
         },
         "deposit_outpoint": "deposit utxo outpoint",
@@ -230,8 +230,7 @@ transactions nonetheless.
 An inactive vault may later become active by sharing signatures for the `unvault`
 transaction.  
 
-Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
-flag.
+Revocation transactions (`cancel` and `emergency`s) are signed with `SIGHASH_ALL`.
 
 
 #### Request
