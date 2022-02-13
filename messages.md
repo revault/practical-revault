@@ -223,7 +223,7 @@ the `cancel` and `emergency` transactions and its watchtower to have verified an
 the signature before possibly sharing its signature for the unvault transaction.
 
 A wallet is not bound to share its signature for the unvault transaction. This flexibility
-allows "unactive vaults": a multisig which is not spendable by default but still guarded
+allows "inactive vaults": a multisig which is not spendable by default but still guarded
 by the emergency transaction deterrent.  
 A wallet must share its signature for the `cancel` and the unvault `emergency`
 transactions nonetheless.  
