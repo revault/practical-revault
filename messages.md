@@ -50,6 +50,10 @@ with (one of) its watchtower(s).
 It must wait for a positive response from the watchtower before sharing the Unvault transaction
 signature.
 
+The Cancel transaction signature is shared at various feerates. This is for the watchtowers to be
+able to adapt the Cancel transaction to the fee market, short of having a decent fee-bumping
+technique.  
+
 #### Request
 
 ```json
@@ -62,8 +66,13 @@ signature.
               "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
           },
           "cancel": {
-              "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
-              "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              "feerate A (sat/vb)": {
+                  "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+                  "pubkeyC": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              },
+              "feerate D (sat/vb)": {
+                  "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              }
           }
           "unvault_emergency": {
               "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
