@@ -128,8 +128,7 @@ pays back to a deposit output (it is therefore another vault deposit transaction
 
 The Cancel transaction is signed using the `ALL` signature hash flag.
 
-The Cancel transaction is signed at a fixed `22 sat/WU` feerate. This is in order to
-reduce the funds burden on *each* of the watchtowers.
+The Cancel transaction is signed at various feerates, defined by a deployment's parameters.
 
 - version: 2
 - locktime: 0
