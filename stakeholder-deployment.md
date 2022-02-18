@@ -1,7 +1,3 @@
----
-geometry: margin=2cm
----
-
 # Stakeholder Deployment Process
 
 ## Device list
@@ -161,8 +157,8 @@ Steps:
 | OS SD - _my name_           | NA |
 | Software SD - _my name_     | NA |
 | "Used" Laptop               | NA |
-| New Laptop 1                | OS, revault, watchtower, ceremony tool, mnemonic seed, vault (xpriv, xpub), emergency (xpriv, xpub), noise (privkey, pubkey), WT (xpriv, xpub), WT noise (privkey, pubkey) |
-| New Laptop 2                | OS, revault, watchtower, ceremony tool, mnemonic seed, vault (xpriv, xpub), emergency (xpriv, xpub), noise (privkey, pubkey), WT (xpriv, xpub), WT noise (privkey, pubkey) |
+| New Laptop 1                | OS, revault, watchtower, ceremony tool, mnemonic seed, vault (xpriv, xpub), emergency (xpriv, xpub), noise (privkey, pubkey), WT noise (privkey, pubkey) |
+| New Laptop 2                | OS, revault, watchtower, ceremony tool, mnemonic seed, vault (xpriv, xpub), emergency (xpriv, xpub), noise (privkey, pubkey), WT noise (privkey, pubkey) |
 | Vault Backup 1              | vault mnemonic seed |
 | Vault Backup 2              | vault mnemonic seed |
 | Emergency Backup 1          | emergency mnemonic seed |
@@ -204,7 +200,7 @@ Steps:
 | Emergency Backup 2          | emergency mnemonic seed |
 | Signing Device - _my name_  | vault (xpriv, xpub), emergency 0-100 pubkeys |
 | Revault SD - _my name_      | revault, vault 0 xpub, emergency 0 pubkey, noise 0 (privkey, pubkey), WT 0 noise  pubkey |
-| Watchtower SD - _my name_   | watchtower, vault 0 xpub, noise 0 pubkey, WT 0 (xpriv, xpub), WT 0 noise (privkey, pubkey) |
+| Watchtower SD - _my name_   | watchtower, vault 0 xpub, noise 0 pubkey, WT 0 noise (privkey, pubkey) |
 | Emergency Pubkey SD - _my name_  1  | emergency 0 pubkey, extern pubkey 1, ..., extern pubkey X |
 |                         ...         |      |
 | Emergency Pubkey SD - _my name_  N_s| emergency 0 pubkey, extern pubkey 1, ..., extern pubkey X |
@@ -232,7 +228,7 @@ Steps:
 | Emergency Backup 2          | emergency mnemonic seed |
 | Signing Device - _my name_  | vault (xpriv, xpub), emergency 0-100 pubkeys |
 | Revault SD - _my name_      | revault, vault 0 xpub, emergency 0 pubkey, noise 0 (privkey, pubkey), WT 0 noise  pubkey |
-| Watchtower SD - _my name_   | watchtower, vault 0 xpub, noise 0 pubkey, WT 0 (xpriv, xpub), WT 0 noise (privkey, pubkey) |
+| Watchtower SD - _my name_   | watchtower, vault 0 xpub, noise 0 pubkey, WT 0 noise (privkey, pubkey) |
 | Emergency Pubkey SD - _my name_  1  | emergency 0 pubkey, extern pubkey 1, ..., extern pubkey X |
 |                         ...         |      |
 | Emergency Pubkey SD - _my name_  N_s| emergency 0 pubkey, extern pubkey 1, ..., extern pubkey X |
@@ -271,7 +267,7 @@ Steps:
 | Emergency Backup 2          | emergency mnemonic seed |
 | Signing Device - _my name_  | my vault (xpriv, xpub), emergency 0-100 pubkeys, all participants' vault/ unvault 0 xpubs |
 | Revault SD - _my name_      | revault, vault 0 xpub, emergency 0 pubkey, noise 0 (privkey, pubkey), WT 0 noise  pubkey |
-| Watchtower SD - _my name_   | watchtower, vault 0 xpub, noise 0 pubkey, WT 0 (xpriv, xpub), WT 0 noise (privkey, pubkey) |
+| Watchtower SD - _my name_   | watchtower, vault 0 xpub, noise 0 pubkey, WT 0 noise (privkey, pubkey) |
 | Emergency Pubkey SD - _my name_  1  | emergency 0 pubkey, extern pubkey 1, ..., extern pubkey X |
 |                         ...         |      |
 | Emergency Pubkey SD - _my name_  N_s| emergency 0 pubkey, extern pubkey 1, ..., extern pubkey X |
