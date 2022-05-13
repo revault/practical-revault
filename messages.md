@@ -282,12 +282,8 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 {
     "result": {
         "signatures": {
-            "pubkeyA": {
-                "signature": "Bitcoin ECDSA signature"
-            },
-            "pubkeyC": {
-                "signature": "Bitcoin ECDSA signature"
-            }
+            "pubkeyA": "Bitcoin ECDSA signature",
+            "pubkeyC": "Bitcoin ECDSA signature"
         }
     }
 }
