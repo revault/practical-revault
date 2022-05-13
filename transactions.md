@@ -10,6 +10,9 @@ to unlock the unvault transaction output along with the cosigning servers after 
 and `X` the CSV value in the unvault transaction. Each transaction type here signals 
 replace-by-fee (RBF).
 
+While a larger number of participants is technically possible, we explicitly limit the number of
+stakeholders and managers to `20`.
+
 - [deposit_tx](#deposit_tx)
 - [unvault_tx](#unvault_tx)
 - [spend_tx](#spend_tx)
