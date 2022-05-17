@@ -282,12 +282,8 @@ Sent by a wallet to retrieve all signatures for a specific transaction.
 {
     "result": {
         "signatures": {
-            "pubkeyA": {
-                "signature": "Bitcoin ECDSA signature"
-            },
-            "pubkeyC": {
-                "signature": "Bitcoin ECDSA signature"
-            }
+            "pubkeyA": "Bitcoin ECDSA signature",
+            "pubkeyC": "Bitcoin ECDSA signature"
         }
     }
 }
@@ -308,7 +304,7 @@ set of Unvault.
 {
     "method": "set_spend_tx",
     "params": {
-        "deposit_outpoint": ["txid:vout", "txid:vout"],
+        "deposit_outpoints": ["txid:vout", "txid:vout"],
         "spend_tx": "base64 of Bitcoin-serialized fully-signed spend transaction"
     }
 }
