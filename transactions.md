@@ -126,11 +126,9 @@ The CPFP output value is adjusted depending on the actual transaction size.
 The transaction which spends the [`unvault_tx`](#unvault_tx) `output[0]` using the N-of-N path and 
 pays back to a deposit output (it is therefore another vault deposit transaction).
 
-The Cancel transaction is signed using the `ALL | ANYONECANPAY` signature hash flag, to
-allow watchtowers (or anyone else) to attach fee-bumping inputs.
+The Cancel transaction is signed using the `ALL` signature hash flag.
 
-The Cancel transaction is signed at a fixed `22 sat/WU` feerate. This is in order to
-reduce the funds burden on *each* of the watchtowers.
+The Cancel transaction is signed at various feerates, defined by a deployment's parameters.
 
 - version: 2
 - locktime: 0
@@ -160,10 +158,9 @@ funds. They lock coins to what we call an EDV (Emergency Deep Vault): a script c
 by the participants and kept obfuscated by the properties of P2WSH, as the emergency
 transactions are never meant to be used.
 
-Both Emergency transactions are signed at a fixed `75 sat/WU` feerate.
+Both Emergency transactions are signed at a fixed `250 sat/WU` feerate.
 
-Both Emergency transaction are signed using the `ALL | ANYONECANPAY` signature hash flag,
-to allow watchtowers (or anyone else) to attach fee-bumping inputs.
+Both Emergency transaction are signed using the `ALL` signature hash flag.
 
 The Emergency `scriptPubKey` is not known to the managers.
 

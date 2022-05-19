@@ -50,6 +50,10 @@ with (one of) its watchtower(s).
 It must wait for a positive response from the watchtower before sharing the Unvault transaction
 signature.
 
+The Cancel transaction signature is shared at various feerates. This is for the watchtowers to be
+able to adapt the Cancel transaction to the fee market, short of having a decent fee-bumping
+technique.  
+
 #### Request
 
 ```json
@@ -58,16 +62,21 @@ signature.
     "params": {
         "signatures": {
           "emergency": {
-              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
           },
           "cancel": {
-              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "feerate A (sat/vb)": {
+                  "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+                  "pubkeyC": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              },
+              "feerate D (sat/vb)": {
+                  "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              }
           }
           "unvault_emergency": {
-              "pubkeyA": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
-              "pubkeyB": "ALL|ANYONECANPAY Bitcoin ECDSA signature as hex",
+              "pubkeyA": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
+              "pubkeyB": "SIGHASH_ALL Bitcoin ECDSA signature as hex",
           }
         },
         "deposit_outpoint": "deposit utxo outpoint",
@@ -227,15 +236,14 @@ the `cancel` and `emergency` transactions and its watchtower to have verified an
 the signature before possibly sharing its signature for the unvault transaction.
 
 A wallet is not bound to share its signature for the unvault transaction. This flexibility
-allows "unactive vaults": a multisig which is not spendable by default but still guarded
+allows "inactive vaults": a multisig which is not spendable by default but still guarded
 by the emergency transaction deterrent.  
 A wallet must share its signature for the `cancel` and the unvault `emergency`
 transactions nonetheless.  
 An inactive vault may later become active by sharing signatures for the `unvault`
 transaction.  
 
-Revocation transactions (`cancel` and `emergency`s) are signed with the `ALL|ANYONECANPAY`
-flag.
+Revocation transactions (`cancel` and `emergency`s) are signed with `SIGHASH_ALL`.
 
 
 #### Request
