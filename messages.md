@@ -352,7 +352,8 @@ return `null`.
 ```json
 {
     "result": {
-        "spend_tx": "base64 of Bitcoin-serialized spend tx"
+        "spend_tx": "base64 of Bitcoin-serialized spend tx",
+        "deposit_outpoints": ["txid:vout", "txid:vout"]
     }
 }
 ```
@@ -361,6 +362,7 @@ or, if the coordinator doesn't have the spend:
 {
     "result": {
         "spend_tx": null,
+        "deposit_outpoints": []
     }
 }
 ```
